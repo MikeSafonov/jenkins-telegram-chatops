@@ -21,7 +21,8 @@ import java.util.Map;
 @Log4j2
 @Component
 public class JenkinsServerWrapper {
-    private static final String FOLDER_CLASS = "com.cloudbees.hudson.plugins.folder.Folder";
+    static final String FOLDER_CLASS = "com.cloudbees.hudson.plugins.folder.Folder";
+    static final String WORKFLOW_MULTIBRANCH_PROJECT_CLASS = "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject";
 
     private final JenkinsServer jenkinsServer;
 
@@ -35,6 +36,10 @@ public class JenkinsServerWrapper {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public JenkinsServer getJenkinsServer() {
+        return jenkinsServer;
     }
 
     public List<Job> getBuildableJobs() {
