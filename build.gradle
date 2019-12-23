@@ -1,0 +1,90 @@
+plugins {
+    id "java"
+    id "jacoco"
+    id "org.springframework.boot" version "2.2.2.RELEASE"
+}
+
+apply plugin: "io.spring.dependency-management"
+
+
+group = "com.github.mikesafonov"
+version = "0.0.1"
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+wrapper {
+    gradleVersion = "6.0.1"
+}
+
+bootJar {
+    archiveFileName = "jenkins-telegram-chatops.jar"
+    launchScript()
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            additional = [
+                    version    : project.version
+            ]
+        }
+    }
+}
+
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3"
+    }
+}
+
+
+test{
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
+}
+
+configurations {
+    implementation.exclude module: "spring-boot-starter-logging"
+}
+
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    implementation("org.telegram:telegrambots-spring-boot-starter:4.3.1")
+
+    implementation("org.apache.logging.log4j:log4j-web")
+
+    implementation("io.micrometer:micrometer-core")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "junit", module: "junit"
+        exclude module: "junit-vintage-engine"
+    }
+
+    testImplementation("org.assertj:assertj-core")
+}
+
+jacoco {
+    toolVersion = "0.8.3"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled = false
+    }
+}
+
