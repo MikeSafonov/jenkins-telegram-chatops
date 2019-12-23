@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author Mike Safonov
  */
@@ -19,4 +21,6 @@ public class TelegramBotProperties {
     private int connectionTimeout;
     private int connectionRequestTimeout;
     private int socketTimeout;
+
+    private List<Long> users;
 }

@@ -14,16 +14,23 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private final TelegramBotProperties telegramBotProperties;
     private final JenkinsService jenkinsService;
+    private final BotSecurityService botSecurityService;
 
-    public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties, JenkinsService jenkinsService) {
+    public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties,
+                              JenkinsService jenkinsService, BotSecurityService botSecurityService) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
         this.jenkinsService = jenkinsService;
+        this.botSecurityService = botSecurityService;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        log.info(update);
+        if (update.getMessage() != null) {
+            if (botSecurityService.isAllowed(update.getMessage().getChatId())) {
+                log.info(update);
+            }
+        }
     }
 
     @Override
