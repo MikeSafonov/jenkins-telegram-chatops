@@ -13,10 +13,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Service
 public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private final TelegramBotProperties telegramBotProperties;
+    private final JenkinsService jenkinsService;
 
-    public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties) {
+    public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties, JenkinsService jenkinsService) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
+        this.jenkinsService = jenkinsService;
     }
 
     @Override
