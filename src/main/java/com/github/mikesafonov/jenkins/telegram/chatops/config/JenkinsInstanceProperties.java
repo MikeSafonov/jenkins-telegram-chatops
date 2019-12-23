@@ -1,4 +1,4 @@
-package com.github.mikesafonov.jenkins.telegram.chatops;
+package com.github.mikesafonov.jenkins.telegram.chatops.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

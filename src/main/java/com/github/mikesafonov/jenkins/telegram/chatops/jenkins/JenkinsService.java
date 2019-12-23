@@ -1,6 +1,5 @@
-package com.github.mikesafonov.jenkins.telegram.chatops;
+package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
-import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsServerWrapper;
 import com.offbytwo.jenkins.model.Job;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

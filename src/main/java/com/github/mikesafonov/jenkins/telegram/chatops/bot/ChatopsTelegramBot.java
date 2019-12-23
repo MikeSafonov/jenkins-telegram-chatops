@@ -1,5 +1,7 @@
-package com.github.mikesafonov.jenkins.telegram.chatops;
+package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;

@@ -1,6 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
-import com.github.mikesafonov.jenkins.telegram.chatops.JenkinsInstanceProperties;
+import com.github.mikesafonov.jenkins.telegram.chatops.config.JenkinsInstanceProperties;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;

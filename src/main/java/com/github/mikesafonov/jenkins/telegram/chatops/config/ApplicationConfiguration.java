@@ -1,4 +1,4 @@
-package com.github.mikesafonov.jenkins.telegram.chatops;
+package com.github.mikesafonov.jenkins.telegram.chatops.config;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;

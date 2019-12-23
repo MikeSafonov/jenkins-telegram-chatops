@@ -1,5 +1,6 @@
-package com.github.mikesafonov.jenkins.telegram.chatops;
+package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
