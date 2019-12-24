@@ -6,7 +6,6 @@ import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotPropert
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsJob;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobNameBuilder;
-import com.offbytwo.jenkins.model.BuildWithDetails;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -26,6 +25,7 @@ import java.util.List;
 @Service
 public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private static final String JOBS_COMMAND = "/jobs";
+    private static final String RUN_COMMAND = "/run";
 
     private final TelegramBotProperties telegramBotProperties;
     private final JenkinsService jenkinsService;
@@ -58,6 +58,16 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
         if (text.equals(JOBS_COMMAND)) {
             List<JenkinsJob> jobs = jenkinsService.getJobs();
             jobs.forEach(jenkinsJob -> processJob(telegramMessage.getChatId(), null, jenkinsJob));
+        } else if (text.startsWith(RUN_COMMAND)) {
+            String jobName = text.replace(RUN_COMMAND, "");
+            if (jobName.isBlank()) {
+                sendMarkdownTextMessage(telegramMessage.getChatId(), "Please pass job name!");
+            } else {
+                jobName = jobName.strip();
+                jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(telegramMessage.getChatId(),
+                        "Build finished.\nBuild result:" + build.getResult() + "\n[launch on Jenkins](" + build.getUrl() + ")"),
+                        () -> sendMarkdownTextMessage(telegramMessage.getChatId(), "Build failed"));
+            }
         }
     }
 
@@ -71,14 +81,10 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             jobs.forEach(jenkinsJob -> processJob(chatId, folderName, jenkinsJob));
         } else if (data.startsWith("run=")) {
             String jobName = data.replace("run=", "");
-            BuildWithDetails build = jenkinsService.runJob(jobName);
             Long chatId = Long.valueOf(callbackQuery.getFrom().getId());
-            if (build != null) {
-                sendMarkdownTextMessage(chatId, "Build finished.\nBuild result:" + build.getResult() + "\n[launch on Jenkins](" + build.getUrl() + ")");
-            } else {
-                sendMarkdownTextMessage(chatId, "Build failed");
-            }
-
+            jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(chatId,
+                    "Build finished.\nBuild result:" + build.getResult() + "\n[launch on Jenkins](" + build.getUrl() + ")"),
+                    () -> sendMarkdownTextMessage(chatId, "Build failed"));
         }
 
     }

@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Mike Safonov
@@ -42,6 +40,33 @@ public class JenkinsServerWrapper {
         return jenkinsServer;
     }
 
+    public Map<String, Job> getJobs() {
+        try {
+            return jenkinsServer.getJobs();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyMap();
+    }
+
+    public Map<String, Job> getJobsByFolder(String folder, String url) {
+        try {
+            return jenkinsServer.getJobs(new FolderJob(folder, url));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyMap();
+    }
+
+    public Optional<JobWithDetails> getJobByName(String jobName) {
+        try {
+            return Optional.ofNullable(jenkinsServer.getJob(jobName));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
     public List<Job> getBuildableJobs() {
         List<Job> buildableJobs = new ArrayList<>();
         try {
@@ -61,7 +86,7 @@ public class JenkinsServerWrapper {
                     collectBuildableJobsFromMap(jenkinsServer.getJobs(folderJob), collectList);
                 } else {
                     JobWithDetails details = job.details();
-                    if(details.isBuildable()){
+                    if (details.isBuildable()) {
                         collectList.add(job);
                     }
                 }

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,37 +24,22 @@ public class JenkinsService {
     private final JenkinsServerWrapper jenkinsServer;
 
     public List<JenkinsJob> getJobs() {
-        try {
-            Map<String, Job> jobs = jenkinsServer.getJenkinsServer().getJobs();
-            return mapJobs(jobs);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return Collections.emptyList();
+        Map<String, Job> jobs = jenkinsServer.getJobs();
+        return mapJobs(jobs);
     }
 
     public List<JenkinsJob> getJobsInFolder(String folder) {
-        try {
-            JobWithDetails folderJob = jenkinsServer.getJenkinsServer().getJob(folder);
-            Map<String, Job> jobs = jenkinsServer.getJenkinsServer()
-                    .getJobs(new FolderJob(folder, folderJob.getUrl()));
-            return mapJobs(jobs);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return Collections.emptyList();
+        return jenkinsServer.getJobByName(folder).map(jobWithDetails -> {
+                    Map<String, Job> jobs = jenkinsServer.getJobsByFolder(folder, jobWithDetails.getUrl());
+                    return mapJobs(jobs);
+                }
+        )
+                .orElseGet(Collections::emptyList);
     }
 
-    public BuildWithDetails runJob(String jobName) {
-        try {
-            JobWithDetails job = jenkinsServer.getJenkinsServer().getJob(jobName);
-            QueueReference queueReference = job.build(true);
-
-            return triggerJobAndWaitUntilFinished(jobName, queueReference);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
+    public Optional<BuildWithDetails> runJob(String jobName) {
+        return jenkinsServer.getJobByName(jobName)
+                .map(job -> buildJob(job, jobName));
     }
 
     private List<JenkinsJob> mapJobs(Map<String, Job> jobs) {
@@ -62,8 +48,19 @@ public class JenkinsService {
                 .collect(toList());
     }
 
+    private BuildWithDetails buildJob(Job job, String jobName) {
+        try {
+            QueueReference queueReference = job.build(true);
+            return triggerJobAndWaitUntilFinished(jobName, queueReference);
+        } catch (IOException | InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     /**
      * see https://github.com/jenkinsci/java-client-api/issues/440
+     *
      * @param jobName
      * @param queueRef
      * @return
