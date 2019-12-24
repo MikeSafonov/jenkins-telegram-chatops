@@ -1,9 +1,22 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    configurations.maybeCreate("pitest")
+
+    dependencies {
+        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.5"
+        pitest "org.pitest:pitest-junit5-plugin:0.11"
+    }
+}
+
 plugins {
     id "java"
     id "jacoco"
     id "org.springframework.boot" version "2.2.2.RELEASE"
 }
 
+apply plugin: "info.solidsoft.pitest"
 apply plugin: "io.spring.dependency-management"
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -90,5 +103,16 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled = false
     }
+}
+
+pitest {
+    testPlugin = "junit5"
+    targetClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.bot.*",
+                     "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*"]
+    threads = 2
+    outputFormats = ["XML", "HTML"]
+    avoidCallsTo = ["org.apache.logging.log4j.Logger"]
+    timestampedReports = false
+    enableDefaultIncrementalAnalysis = true
 }
 
