@@ -65,7 +65,7 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             } else {
                 jobName = jobName.strip();
                 jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(telegramMessage.getChatId(),
-                        "Build finished.\nBuild result:" + build.getResult() + "\n[launch on Jenkins](" + build.getUrl() + ")"),
+                        "Build started\n[launch on Jenkins](" + build.getUrl() + ")"),
                         () -> sendMarkdownTextMessage(telegramMessage.getChatId(), "Build failed"));
             }
         }
@@ -83,7 +83,7 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             String jobName = data.replace("run=", "");
             Long chatId = Long.valueOf(callbackQuery.getFrom().getId());
             jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(chatId,
-                    "Build finished.\nBuild result:" + build.getResult() + "\n[launch on Jenkins](" + build.getUrl() + ")"),
+                    "Build started\n[launch on Jenkins](" + build.getUrl() + ")"),
                     () -> sendMarkdownTextMessage(chatId, "Build failed"));
         }
 
