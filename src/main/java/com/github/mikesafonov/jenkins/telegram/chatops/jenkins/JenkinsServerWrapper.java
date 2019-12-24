@@ -40,6 +40,9 @@ public class JenkinsServerWrapper {
         return jenkinsServer;
     }
 
+    /**
+     * @return map of jobs at the summary level or empty map if IOException throws
+     */
     public Map<String, Job> getJobs() {
         try {
             return jenkinsServer.getJobs();
@@ -49,6 +52,11 @@ public class JenkinsServerWrapper {
         return Collections.emptyMap();
     }
 
+    /**
+     * @param folder folder name
+     * @param url    folder url
+     * @return map of jobs in folder or empty map if IOException throws
+     */
     public Map<String, Job> getJobsByFolder(String folder, String url) {
         try {
             return jenkinsServer.getJobs(new FolderJob(folder, url));
@@ -58,6 +66,11 @@ public class JenkinsServerWrapper {
         return Collections.emptyMap();
     }
 
+    /**
+     *
+     * @param jobName job`s name
+     * @return JobWithDetails of job with name or empty if IOException throws
+     */
     public Optional<JobWithDetails> getJobByName(String jobName) {
         try {
             return Optional.ofNullable(jenkinsServer.getJob(jobName));
