@@ -114,5 +114,7 @@ pitest {
     avoidCallsTo = ["org.apache.logging.log4j.Logger"]
     timestampedReports = false
     enableDefaultIncrementalAnalysis = true
+    historyInputLocation = ".pitest/pitHistory.txt"
+    historyOutputLocation = ".pitest/pitHistory.txt"
 }
 
