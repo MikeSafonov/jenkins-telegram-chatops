@@ -1,18 +1,26 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.offbytwo.jenkins.model.Job;
+
 /**
+ * Builder class for Jenkins job name.
+ *
  * @author Mike Safonov
  */
 public class JobNameBuilder {
-    private JenkinsJob jenkinsJob;
+    private Job jenkinsJob;
     private String folderName;
 
-    public JobNameBuilder(JenkinsJob jenkinsJob) {
+    private JobNameBuilder(Job jenkinsJob) {
         this.jenkinsJob = jenkinsJob;
     }
 
     public static JobNameBuilder from(JenkinsJob jenkinsJob) {
-        return new JobNameBuilder(jenkinsJob);
+        return new JobNameBuilder(jenkinsJob.getOriginalJob());
+    }
+
+    public static JobNameBuilder from(Job job) {
+        return new JobNameBuilder(job);
     }
 
     public JobNameBuilder inFolder(String folderName) {
@@ -22,13 +30,13 @@ public class JobNameBuilder {
 
     public String build() {
         if (folderName == null) {
-            return (jenkinsJob.getOriginalJob().getFullName() == null) ?
-                    jenkinsJob.getOriginalJob().getName() :
-                    jenkinsJob.getOriginalJob().getFullName();
+            return (jenkinsJob.getFullName() == null) ?
+                    jenkinsJob.getName() :
+                    jenkinsJob.getFullName();
         } else {
-            return (jenkinsJob.getOriginalJob().getFullName() == null) ?
-                    folderName + "/" + jenkinsJob.getOriginalJob().getName() :
-                    jenkinsJob.getOriginalJob().getFullName();
+            return (jenkinsJob.getFullName() == null) ?
+                    folderName + "/" + jenkinsJob.getName() :
+                    jenkinsJob.getFullName();
         }
     }
 }
