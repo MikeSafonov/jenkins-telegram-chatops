@@ -71,6 +71,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.retry:spring-retry")
 
     implementation("org.telegram:telegrambots-spring-boot-starter:4.4.0.2")
 
