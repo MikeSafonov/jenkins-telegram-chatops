@@ -1,15 +1,19 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildNotFoundJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.JobNotFoundJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.QueueItemNotFoundJenkinsApiException;
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.model.FolderJob;
-import com.offbytwo.jenkins.model.Job;
-import com.offbytwo.jenkins.model.JobWithDetails;
+import com.offbytwo.jenkins.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Safonov
@@ -22,10 +26,6 @@ public class JenkinsServerWrapper {
     static final String WORKFLOW_MULTIBRANCH_PROJECT_CLASS = "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject";
 
     private final JenkinsServer jenkinsServer;
-
-    public JenkinsServer getJenkinsServer() {
-        return jenkinsServer;
-    }
 
     /**
      * @return map of jobs at the summary level or empty map if IOException throws
@@ -54,16 +54,53 @@ public class JenkinsServerWrapper {
     }
 
     /**
-     *
      * @param jobName job`s name
-     * @return JobWithDetails of job with name or empty if IOException throws
+     * @return JobWithDetails of job with name
      */
-    public Optional<JobWithDetails> getJobByName(String jobName) {
+    public JobWithDetails getJobByName(String jobName) {
         try {
-            return Optional.ofNullable(jenkinsServer.getJob(jobName));
+            JobWithDetails job = jenkinsServer.getJob(jobName);
+            if (job == null) {
+                throw new JobNotFoundJenkinsApiException(jobName);
+            }
+            return job;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return Optional.empty();
+            throw new JobNotFoundJenkinsApiException(jobName, e);
+        }
+    }
+
+    /**
+     * @param queueRef queue reference
+     * @return queue item
+     */
+    public QueueItem getQueueItem(QueueReference queueRef) {
+        try {
+            QueueItem queueItem = jenkinsServer.getQueueItem(queueRef);
+            if (queueItem == null) {
+                throw new QueueItemNotFoundJenkinsApiException(queueRef.getQueueItemUrlPart());
+            }
+            return queueItem;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new QueueItemNotFoundJenkinsApiException(queueRef.getQueueItemUrlPart(), e);
+        }
+    }
+
+    /**
+     * @param queueItem item in queue
+     * @return build
+     */
+    public Build getBuild(QueueItem queueItem) {
+        try {
+            Build build = jenkinsServer.getBuild(queueItem);
+            if (build == null) {
+                throw new BuildNotFoundJenkinsApiException(queueItem.getId());
+            }
+            return build;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new BuildNotFoundJenkinsApiException(queueItem.getId(), e);
         }
     }
 
