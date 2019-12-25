@@ -16,9 +16,8 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MikeSafonov_jenkins-telegram-chatops&metric=ncloc)](https://sonarcloud.io/dashboard?id=MikeSafonov_jenkins-telegram-chatops)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MikeSafonov_jenkins-telegram-chatops&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MikeSafonov_jenkins-telegram-chatops)
 
-jenkins-telegram-chatops is a [Spring Boot](https://github.com/spring-projects/spring-boot) application which handing 
-[Jira](https://www.atlassian.com/software/jira) webhook events and sends notifications via 
-[Telegram](https://telegram.org) bot.
+`Jenkins-telegram-chatops` is a Telegram bot written using [Spring Boot](https://github.com/spring-projects/spring-boot) which handing 
+able to show list of Jenkins jobs and run specific job.
 
 ## Key features
 
