@@ -32,6 +32,17 @@ public class JobNameBuilderTest {
     }
 
     @Test
+    void shouldBuildFromNameFromJenkinsJob() {
+        Job job = mock(Job.class);
+        String name = "Job Name";
+        when(job.getFullName()).thenReturn(null);
+        when(job.getName()).thenReturn(name);
+        JenkinsJob jenkinsJob = new JenkinsJob(job);
+
+        assertEquals(name, JobNameBuilder.from(jenkinsJob).build());
+    }
+
+    @Test
     void shouldReturnFromNameAndFolder() {
         Job job = mock(Job.class);
         String name = "Job Name";
