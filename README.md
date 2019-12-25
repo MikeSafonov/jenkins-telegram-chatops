@@ -110,6 +110,37 @@ locations:
   <dd>the socket timeout in milliseconds, which is the timeout for waiting for data  or, put differently, a maximum period inactivity between two consecutive data packets)</dd>
 </dl>
 
+#### Retryable configuration for checking Jenkins jobs status
+
+When Jenkins job run via REST API `jenkins-telegram-chatops` waits until it finished.
+There are three steps :
+
+- wait until job in Jenkins queue
+- wait until job not started yet
+- wait until job building
+
+Each steps performs REST API calls in `maxAttempts` attempts with some `delay`.
+
+<dl> 
+  <dt>jenkins.retry.inqueue.maxAttempts</dt>
+  <dd>count max calls for `wait until job in Jenkins queue` </dd>
+    
+  <dt>jenkins.retry.inqueue.backoff.delay</dt>
+  <dd>delay in ms for `wait until job in Jenkins queue`</dd>
+  
+  <dt>jenkins.retry.notstarted.maxAttempts</dt>
+    <dd>count max calls for `wait until job not started yet` </dd>
+      
+  <dt>jenkins.retry.notstarted.backoff.delay</dt>
+  <dd>delay in ms for `wait until job not started yet`</dd>
+    
+  <dt>jenkins.retry.building.maxAttempts</dt>
+  <dd>count max calls for `wait until job building` </dd>
+    
+  <dt>jenkins.retry.building.backoff.delay</dt>
+  <dd>delay in ms for `wait until job building`</dd>
+ </dl>
+
 ## Telegram bot commands
 
 Telegram bot supports following text commands:

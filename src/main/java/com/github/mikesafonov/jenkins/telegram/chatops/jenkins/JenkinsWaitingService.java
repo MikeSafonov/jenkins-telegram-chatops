@@ -27,7 +27,9 @@ public class JenkinsWaitingService {
      * @param jobName  Jenkins job name
      * @param queueRef reference to item in Jenkins queue
      */
-    @Retryable(value = {RunJobJenkinsApiException.class}, maxAttempts = 1000)
+    @Retryable(value = {RunJobJenkinsApiException.class},
+            maxAttemptsExpression = "#{${jenkins.retry.inqueue.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${jenkins.retry.inqueue.backoff.delay}}"))
     public void waitUntilJobInQueue(String jobName, QueueReference queueRef) {
         JobWithDetails jobWithDetails = jenkinsServer.getJobByName(jobName);
         QueueItem item = jenkinsServer.getQueueItem(queueRef);
@@ -42,7 +44,9 @@ public class JenkinsWaitingService {
      * @param jobName  Jenkins job name
      * @param queueRef reference to item in Jenkins queue
      */
-    @Retryable(value = {RunJobJenkinsApiException.class}, maxAttempts = 60)
+    @Retryable(value = {RunJobJenkinsApiException.class},
+            maxAttemptsExpression = "#{${jenkins.retry.notstarted.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${jenkins.retry.notstarted.backoff.delay}}"))
     public void waitUntilJobNotStarted(String jobName, QueueReference queueRef) {
         QueueItem item = jenkinsServer.getQueueItem(queueRef);
         if (isNotExecutable(item)) {
@@ -57,7 +61,8 @@ public class JenkinsWaitingService {
      * @param build   Jenkins build
      */
     @Retryable(value = {RunJobJenkinsApiException.class}, exclude = {BuildDetailsNotFoundJenkinsApiException.class},
-            maxAttempts = 200, backoff = @Backoff(value = 200L))
+            maxAttemptsExpression = "#{${jenkins.retry.building.maxAttempts}}",
+            backoff = @Backoff(delayExpression = "#{${jenkins.retry.building.backoff.delay}}"))
     public void waitUntilJobIsBuilding(String jobName, Build build) {
         try {
             BuildWithDetails details = build.details();
