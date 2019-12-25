@@ -81,6 +81,7 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
                 telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), "Please pass job name!");
             } else {
                 jobRunQueueService.registerJob(new JobToRun(jobName.strip(), telegramMessage.getChatId()));
+                telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), "Job *" + jobName + "* registered to run");
             }
         } else if (text.equals(HELP_COMMAND)) {
             telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(),
