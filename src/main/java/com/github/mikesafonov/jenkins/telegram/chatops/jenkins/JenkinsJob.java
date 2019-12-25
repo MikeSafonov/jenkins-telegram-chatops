@@ -1,8 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
-import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -35,11 +33,5 @@ public class JenkinsJob {
             log.error(e.getMessage(), e);
             return false;
         }
-    }
-
-    @SneakyThrows
-    public String getDescription() {
-        FolderJob folderJob = new FolderJob(originalJob.getName(), originalJob.getUrl());
-        return folderJob.details().getDescription();
     }
 }
