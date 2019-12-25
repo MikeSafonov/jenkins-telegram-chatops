@@ -73,6 +73,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     runtime("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
 
     implementation("org.telegram:telegrambots-spring-boot-starter:4.4.0.2")
 
