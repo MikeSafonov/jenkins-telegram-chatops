@@ -5,6 +5,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 
 import java.net.URI;
@@ -14,6 +16,8 @@ import java.net.URISyntaxException;
  * @author Mike Safonov
  */
 @Configuration
+@EnableRetry
+@EnableScheduling
 public class ApplicationConfiguration {
 
     @Bean
