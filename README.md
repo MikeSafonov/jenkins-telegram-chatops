@@ -22,7 +22,10 @@ jenkins-telegram-chatops is a [Spring Boot](https://github.com/spring-projects/s
 
 ## Key features
 
-TBA
+- `/jobs` command for listing Jenkins jobs
+- `/run` command for running specific Jenkins job
+- monitoring using [Prometheus](https://prometheus.io)
+- holding secrets with [HashiCorp Vault](https://www.vaultproject.io/)
 
 
 ## Build
@@ -62,6 +65,78 @@ or
 
     ./jenkins-telegram-chatops.jar
 
+## Configuration
+
+According to [Spring Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files)
+you can override default application properties by put custom **application.properties** file in one of the following
+locations:
+
+- a `/config` subdirectory of the current directory
+- the current directory
+
+#### Custom properties
+
+<dl> 
+  <dt>jenkins.url</dt>
+  <dd>URL to Jenkins instance</dd>
+    
+  <dt>jenkins.username</dt>
+  <dd>Jenkins username for REST API</dd>
+  
+  <dt>jenkins.token</dt>
+  <dd>Jenkins user`s token for REST API</dd>
+  
+  <dt>telegram.bot.name</dt>
+  <dd>telegram bot name</dd>
+  
+  <dt>telegram.bot.token</dt>
+  <dd>telegram bot token</dd>
+  
+  <dt>telegram.bot.users</dt>
+  <dd>coma separated list of bot users telegram IDs</dd>
+  
+  <dt>telegram.bot.proxyHost</dt>
+  <dd>http proxy host</dd>
+
+  <dt>telegram.bot.proxyPort</dt>
+  <dd>http proxy port</dd>
+  
+  <dt>telegram.bot.connectionTimeout</dt>
+  <dd>timeout in milliseconds until a connection is established</dd>
+  
+  <dt>telegram.bot.connectionRequestTimeout</dt>
+  <dd>timeout in milliseconds used when requesting a connection</dd>
+    
+  <dt>telegram.bot.socketTimeout</dt>
+  <dd>the socket timeout in milliseconds, which is the timeout for waiting for data  or, put differently, a maximum period inactivity between two consecutive data packets)</dd>
+</dl>
+
+## Telegram bot commands
+
+Telegram bot supports following text commands:
+
+- **_/jobs_** - listing Jenkins jobs
+- **_/run_** *job name* - run *job name* Jenkins job
+- **_/help_** - prints help message
+
+## INTEGRATIONS 
+
+### Monitoring using [Prometheus](https://prometheus.io)
+
+You can access prometheus metrics by url: 
+
+    {host:port}/actuator/prometheus
+
+### Holding secrets with [HashiCorp Vault](https://www.vaultproject.io/)
+
+Integration with `Vault` was made using [spring-cloud-vault](https://cloud.spring.io/spring-cloud-vault/reference/html/).
+
+By default `jenkins-telegram-chatops` integration with `Vault` disabled. 
+
+To enable integration with `Vault` pass following arguments to `jenkins-telegram-chatops` run command:
+
+    java -jar jenkins-telegram-chatops.jar --spring.cloud.vault.enabled=true --spring.cloud.vault.uri=<your vault uri> 
+    --spring.cloud.vault.token=<your vault token> --spring.cloud.vault.kv.application-name=<vault application name>
  
 ## Contributing
 
