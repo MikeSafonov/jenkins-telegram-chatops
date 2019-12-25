@@ -2,6 +2,7 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.BuildableJobMessageWithKeyboard;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.FolderJobMessageWithKeyboard;
+import com.github.mikesafonov.jenkins.telegram.chatops.config.BuildInfo;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
 import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsJob;
@@ -28,22 +29,25 @@ import java.util.List;
 public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private static final String JOBS_COMMAND = "/jobs";
     private static final String RUN_COMMAND = "/run";
+    private static final String HELP_COMMAND = "/help";
 
     private final TelegramBotProperties telegramBotProperties;
     private final JenkinsService jenkinsService;
     private final BotSecurityService botSecurityService;
     private final TelegramBotSender telegramBotSender;
     private final JobRunQueueService jobRunQueueService;
+    private final BuildInfo buildInfo;
 
     public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties,
                               JenkinsService jenkinsService, BotSecurityService botSecurityService,
-                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService) {
+                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService, BuildInfo buildInfo) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
         this.jenkinsService = jenkinsService;
         this.botSecurityService = botSecurityService;
         this.telegramBotSender = telegramBotSender;
         this.jobRunQueueService = jobRunQueueService;
+        this.buildInfo = buildInfo;
     }
 
     @Override
@@ -78,6 +82,13 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             } else {
                 jobRunQueueService.registerJob(new JobToRun(jobName.strip(), telegramMessage.getChatId()));
             }
+        } else if (text.equals(HELP_COMMAND)) {
+            telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(),
+                    "This is [jenkins-telegram-chatops](https://github.com/MikeSafonov/jenkins-telegram-chatops) version " + buildInfo.getVersion() +
+                            "\n\nSupported commands:\n" +
+                            "*/jobs* - listing Jenkins jobs\n" +
+                            "*/run* _jobName_ - running specific Jenkins job\n" +
+                            "*/help* - prints help message");
         }
     }
 
