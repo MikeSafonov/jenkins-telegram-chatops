@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,8 +39,9 @@ public class JenkinsServiceTest {
 
         List<JenkinsJob> jobs = jenkinsService.getJobs();
         assertEquals(2, jobs.size());
-        assertEquals(one, jobs.get(0).getOriginalJob());
-        assertEquals(two, jobs.get(1).getOriginalJob());
+        List<Job> originalJobs = jobs.stream().map(JenkinsJob::getOriginalJob).collect(Collectors.toList());
+        assertTrue(originalJobs.contains(one));
+        assertTrue(originalJobs.contains(two));
     }
 
     @Test
@@ -57,8 +59,9 @@ public class JenkinsServiceTest {
 
         List<JenkinsJob> jobs = jenkinsService.getJobsInFolder(folder);
         assertEquals(2, jobs.size());
-        assertEquals(one, jobs.get(0).getOriginalJob());
-        assertEquals(two, jobs.get(1).getOriginalJob());
+        List<Job> originalJobs = jobs.stream().map(JenkinsJob::getOriginalJob).collect(Collectors.toList());
+        assertTrue(originalJobs.contains(one));
+        assertTrue(originalJobs.contains(two));
     }
 
     @Nested
