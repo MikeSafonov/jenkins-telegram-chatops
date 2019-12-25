@@ -77,6 +77,9 @@ dependencies {
 
     implementation("org.telegram:telegrambots-spring-boot-starter:4.4.0.2")
 
+    implementation("io.micrometer:micrometer-core")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     implementation("com.offbytwo.jenkins:jenkins-client:0.3.8")
 
     implementation("org.apache.logging.log4j:log4j-web")
