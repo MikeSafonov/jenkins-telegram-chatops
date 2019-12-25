@@ -3,9 +3,11 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.BuildableJobMessageWithKeyboard;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.FolderJobMessageWithKeyboard;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
+import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsJob;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobNameBuilder;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobRunQueueService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -30,13 +32,18 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private final TelegramBotProperties telegramBotProperties;
     private final JenkinsService jenkinsService;
     private final BotSecurityService botSecurityService;
+    private final TelegramBotSender telegramBotSender;
+    private final JobRunQueueService jobRunQueueService;
 
     public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties,
-                              JenkinsService jenkinsService, BotSecurityService botSecurityService) {
+                              JenkinsService jenkinsService, BotSecurityService botSecurityService,
+                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
         this.jenkinsService = jenkinsService;
         this.botSecurityService = botSecurityService;
+        this.telegramBotSender = telegramBotSender;
+        this.jobRunQueueService = jobRunQueueService;
     }
 
     @Override
@@ -49,7 +56,13 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
                 handleQuery(update.getCallbackQuery());
             }
         } else {
-            sendTextMessage(update.getMessage(), "Unauthorized request");
+            if (update.getMessage() != null) {
+                telegramBotSender.sendUnauthorized(update.getMessage().getChatId());
+            } else if (update.getCallbackQuery() != null) {
+                telegramBotSender.sendUnauthorized(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
+            } else {
+                log.info("Unable to detect user from " + update);
+            }
         }
     }
 
@@ -61,12 +74,9 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
         } else if (text.startsWith(RUN_COMMAND)) {
             String jobName = text.replace(RUN_COMMAND, "");
             if (jobName.isBlank()) {
-                sendMarkdownTextMessage(telegramMessage.getChatId(), "Please pass job name!");
+                telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), "Please pass job name!");
             } else {
-                jobName = jobName.strip();
-                jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(telegramMessage.getChatId(),
-                        "Build started\n[launch on Jenkins](" + build.getUrl() + ")"),
-                        () -> sendMarkdownTextMessage(telegramMessage.getChatId(), "Build failed"));
+                jobRunQueueService.registerJob(new JobToRun(jobName.strip(), telegramMessage.getChatId()));
             }
         }
     }
@@ -77,16 +87,14 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             String folderName = data.replace("folder=", "");
             List<JenkinsJob> jobs = jenkinsService.getJobsInFolder(folderName);
             Long chatId = Long.valueOf(callbackQuery.getFrom().getId());
-            sendMarkdownTextMessage(chatId, "Child jobs for *" + folderName + "* :");
+            telegramBotSender.sendMarkdownTextMessage(chatId, "Child jobs for *" + folderName + "* :");
             jobs.forEach(jenkinsJob -> processJob(chatId, folderName, jenkinsJob));
         } else if (data.startsWith("run=")) {
             String jobName = data.replace("run=", "");
             Long chatId = Long.valueOf(callbackQuery.getFrom().getId());
-            jenkinsService.runJob(jobName).ifPresentOrElse(build -> sendMarkdownTextMessage(chatId,
-                    "Build started\n[launch on Jenkins](" + build.getUrl() + ")"),
-                    () -> sendMarkdownTextMessage(chatId, "Build failed"));
+            jobRunQueueService.registerJob(new JobToRun(jobName, chatId));
+            telegramBotSender.sendMarkdownTextMessage(chatId, "Job *" + jobName + "* registered to run");
         }
-
     }
 
     private void processJob(Long chatId, String folderName, JenkinsJob jenkinsJob) {
@@ -106,9 +114,9 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
                         jobName,
                         jenkinsJob.getOriginalJob().getUrl());
             }
-            sendApiMethod(message);
+            telegramBotSender.sendMethod(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -125,26 +133,6 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
                 .append(jenkinsJob.getOriginalJob().getName())
                 .append("\n")
                 .toString();
-    }
-
-    private void sendTextMessage(Message message, String text) {
-        sendTextMessage(message.getChatId(), text);
-    }
-
-    private void sendTextMessage(Long chatId, String text) {
-        try {
-            sendApiMethod(new SendMessage(chatId, text));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void sendMarkdownTextMessage(Long chatId, String text) {
-        try {
-            sendApiMethod(new SendMessage(chatId, text).enableMarkdown(true));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     @Override

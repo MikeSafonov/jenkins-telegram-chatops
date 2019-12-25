@@ -1,19 +1,15 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
 import com.offbytwo.jenkins.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.retry.RetryPolicy;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
-import org.springframework.retry.policy.CompositeRetryPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,21 +22,50 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class JenkinsService {
     private final JenkinsServerWrapper jenkinsServer;
+    private final JenkinsWaitingService jenkinsWaitingService;
 
+    /**
+     * @return map of jobs at the summary level
+     */
     public List<JenkinsJob> getJobs() {
         Map<String, Job> jobs = jenkinsServer.getJobs();
         return mapJobs(jobs);
     }
 
+    /**
+     * @param folder folder
+     * @return map of jobs in folder
+     */
     public List<JenkinsJob> getJobsInFolder(String folder) {
         JobWithDetails job = jenkinsServer.getJobByName(folder);
         Map<String, Job> jobs = jenkinsServer.getJobsByFolder(folder, job.getUrl());
         return mapJobs(jobs);
     }
 
-    public Optional<Build> runJob(String jobName) {
-        JobWithDetails jobByName = jenkinsServer.getJobByName(jobName);
-        return Optional.ofNullable(buildJob(jobByName, jobName));
+    /**
+     * Runs job with name {@code jobName} and wait until its finished
+     *
+     * @param jobName Jenkins job name
+     * @return build details
+     */
+    public BuildWithDetails runJob(String jobName) {
+        JobWithDetails job = jenkinsServer.getJobByName(jobName);
+        QueueReference queueReference = buildJob(job, jobName);
+
+        jenkinsWaitingService.waitUntilJobInQueue(jobName, queueReference);
+
+        jenkinsWaitingService.waitUntilJobNotStarted(jobName, queueReference);
+
+        QueueItem queueItem = jenkinsServer.getQueueItem(queueReference);
+
+        if (queueItem.isCancelled()) {
+            var build = jenkinsServer.getBuild(queueItem);
+            return getDetails(jobName, build);
+        }
+
+        var build = jenkinsServer.getBuild(queueItem);
+        jenkinsWaitingService.waitUntilJobIsBuilding(jobName, build);
+        return getDetails(jobName, build);
     }
 
     private List<JenkinsJob> mapJobs(Map<String, Job> jobs) {
@@ -49,95 +74,21 @@ public class JenkinsService {
                 .collect(toList());
     }
 
-    private Build buildJob(JobWithDetails job, String jobName) {
+    private QueueReference buildJob(JobWithDetails job, String jobName) {
         try {
-            QueueReference queueReference = job.build(true);
-            return waitUntilJobFinished(jobName, queueReference);
+            return job.build(true);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+            throw new RunJobJenkinsApiException("Unable to run job " + jobName);
         }
-        return null;
     }
 
-    private Build waitUntilJobFinished(final String jobName, final QueueReference queueRef) {
-
-        waitUntilJobInQueue(jobName, queueRef);
-
-        waitUntilJobNotStarted(queueRef);
-
-        QueueItem queueItem = jenkinsServer.getQueueItem(queueRef);
-        return jenkinsServer.getBuild(queueItem);
-//        if (queueItem.isCancelled()) {
-//            return getDetails(build);
-//        }
-//
-//        waitUntilJobIsBuilding(build);
-//        return getDetails(build);
-    }
-
-    private void waitUntilJobInQueue(String jobName, QueueReference queueRef) {
-        RetryTemplate retryTemplate = new RetryTemplate();
-        SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy();
-        CompositeRetryPolicy compositeRetryPolicy = new CompositeRetryPolicy();
-        compositeRetryPolicy.setPolicies(new RetryPolicy[]{simpleRetryPolicy});
-        retryTemplate.setRetryPolicy(simpleRetryPolicy);
-        retryTemplate.setBackOffPolicy(new FixedBackOffPolicy());
-        retryTemplate.execute(context -> {
-            JobWithDetails jobWithDetails = jenkinsServer.getJobByName(jobName);
-            QueueItem item = jenkinsServer.getQueueItem(queueRef);
-            if (isInQueue(jobWithDetails, item)) {
-                throw new RuntimeException();
-            }
-            return null;
-        });
-    }
-
-    private void waitUntilJobNotStarted(QueueReference queueRef) {
-        int maxAttempts = 60;
-        RetryTemplate retryTemplate = new RetryTemplate();
-        retryTemplate.setRetryPolicy(new SimpleRetryPolicy(maxAttempts));
-        retryTemplate.setBackOffPolicy(new FixedBackOffPolicy());
-        retryTemplate.execute(context -> {
-            QueueItem item = jenkinsServer.getQueueItem(queueRef);
-            if (isNotExecuted(item)) {
-                throw new RuntimeException();
-            }
-            return null;
-        });
-    }
-
-    private void waitUntilJobIsBuilding(Build build) {
-        RetryTemplate retryTemplate = new RetryTemplate();
-        retryTemplate.setRetryPolicy(new SimpleRetryPolicy(200));
-        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-        fixedBackOffPolicy.setBackOffPeriod(200);
-        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
-        retryTemplate.execute(context -> {
-            try {
-                BuildWithDetails details = build.details();
-                if (details.isBuilding()) {
-                    throw new RuntimeException();
-                }
-                return details;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    private static BuildWithDetails getDetails(Build build) {
+    private static BuildWithDetails getDetails(String jobName, Build build) {
         try {
             return build.details();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BuildDetailsNotFoundJenkinsApiException("Unable to find details for job " + jobName +
+                    " and build N " + build.getNumber(), e);
         }
-    }
-
-    static boolean isInQueue(JobWithDetails jobWithDetails, QueueItem queueItem) {
-        return !queueItem.isCancelled() && jobWithDetails.isInQueue();
-    }
-
-    static boolean isNotExecuted(QueueItem queueItem) {
-        return queueItem.getExecutable() == null;
     }
 }
