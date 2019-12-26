@@ -8,6 +8,15 @@ public abstract class ParameterValue<T> {
     private String name;
     private T value;
 
+    public ParameterValue() {
+    }
+
+    public ParameterValue(String _class, String name, T value) {
+        this._class = _class;
+        this.name = name;
+        this.value = value;
+    }
+
     public String get_class() {
         return _class;
     }

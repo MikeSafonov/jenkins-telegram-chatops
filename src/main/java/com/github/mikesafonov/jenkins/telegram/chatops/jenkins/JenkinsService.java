@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,24 @@ public class JenkinsService {
      */
     public BuildWithDetails runJob(String jobName) {
         JobWithDetailsWithProperties job = jenkinsServer.getJobByNameWithProperties(jobName);
-        QueueReference queueReference = buildJob(job, jobName);
+        QueueReference queueReference;
+        var parametersDefinitionProperty = job.getParametersDefinitionProperty();
+        if (parametersDefinitionProperty.isPresent()) {
+            var parameters = parametersDefinitionProperty.get();
+            var params = new HashMap<String, String>();
+            for (var definition : parameters.getParameterDefinitions()) {
+                var parameterValue = definition.getDefaultParameterValue();
+                if (parameterValue != null) {
+                    params.put(parameterValue.getName(), parameterValue.getValue().toString());
+                } else {
+                    throw new RunJobJenkinsApiException("Unable to run job " + jobName
+                            + ": no default value for parameter " + definition.getName());
+                }
+            }
+            queueReference = buildJob(job, jobName, params);
+        } else {
+            queueReference = buildJob(job, jobName);
+        }
 
         jenkinsWaitingService.waitUntilJobInQueue(jobName, queueReference);
 
@@ -78,6 +96,15 @@ public class JenkinsService {
     private QueueReference buildJob(JobWithDetails job, String jobName) {
         try {
             return job.build(true);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RunJobJenkinsApiException("Unable to run job " + jobName);
+        }
+    }
+
+    private QueueReference buildJob(JobWithDetails job, String jobName, Map<String, String> params) {
+        try {
+            return job.build(params, true);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RunJobJenkinsApiException("Unable to run job " + jobName);

@@ -3,7 +3,9 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.JobNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.QueueItemNotFoundJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
 import com.offbytwo.jenkins.JenkinsServer;
+import com.offbytwo.jenkins.client.JenkinsHttpClient;
 import com.offbytwo.jenkins.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +23,14 @@ import static org.mockito.Mockito.when;
  */
 public class JenkinsServerWrapperTest {
     private JenkinsServer jenkinsServer;
+    private JenkinsHttpClient jenkinsHttpClient;
     private JenkinsServerWrapper jenkinsServerWrapper;
 
     @BeforeEach
     void setUp() {
         jenkinsServer = mock(JenkinsServer.class);
-        jenkinsServerWrapper = new JenkinsServerWrapper(jenkinsServer);
+        jenkinsHttpClient = mock(JenkinsHttpClient.class);
+        jenkinsServerWrapper = new JenkinsServerWrapper(jenkinsServer, jenkinsHttpClient);
     }
 
     @Test
@@ -97,6 +101,7 @@ public class JenkinsServerWrapperTest {
 
         assertEquals(queueItem, jenkinsServerWrapper.getQueueItem(queueReference));
     }
+
     @Test
     void shouldThrowBecauseQueueItemNull() throws IOException {
         QueueReference queueReference = new QueueReference("");
@@ -137,6 +142,23 @@ public class JenkinsServerWrapperTest {
         when(jenkinsServer.getBuild(queueItem)).thenThrow(IOException.class);
 
         assertThrows(BuildNotFoundJenkinsApiException.class, () -> jenkinsServerWrapper.getBuild(queueItem));
+    }
+
+    @Test
+    void shouldReturnJobWithProperties() throws IOException {
+        String jobName = "Job name";
+        JobWithDetailsWithProperties jobWithDetailsWithProperties = new JobWithDetailsWithProperties();
+        when(jenkinsHttpClient.get(any(String.class), any(Class.class))).thenReturn(jobWithDetailsWithProperties);
+
+        assertEquals(jobWithDetailsWithProperties, jenkinsServerWrapper.getJobByNameWithProperties(jobName));
+    }
+
+    @Test
+    void shouldThrowExceptionForJobWithPropertiesBecauseIOException() throws IOException {
+        String jobName = "Job name";
+        when(jenkinsHttpClient.get(any(String.class), any(Class.class))).thenThrow(IOException.class);
+
+        assertThrows(JobNotFoundJenkinsApiException.class, () -> jenkinsServerWrapper.getJobByNameWithProperties(jobName));
     }
 
 }

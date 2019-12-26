@@ -8,6 +8,12 @@ public class BooleanParameterDefinition extends ParameterDefinition {
 
     private BooleanParameterValue defaultParameterValue;
 
+    public BooleanParameterDefinition(){}
+
+    public BooleanParameterDefinition(BooleanParameterValue defaultParameterValue) {
+        this.defaultParameterValue = defaultParameterValue;
+    }
+
     @Override
     public BooleanParameterValue getDefaultParameterValue() {
         return defaultParameterValue;

@@ -4,6 +4,7 @@ import com.offbytwo.jenkins.model.JobWithDetails;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -17,5 +18,12 @@ public class JobWithDetailsWithProperties extends JobWithDetails {
         return property.stream()
                 .filter(Objects::nonNull)
                 .collect(toList());
+    }
+
+    public Optional<ParametersDefinitionProperty> getParametersDefinitionProperty() {
+        return getProperty().stream()
+                .filter(ParametersDefinitionProperty.class::isInstance)
+                .map(jobProperty -> (ParametersDefinitionProperty) jobProperty)
+                .findFirst();
     }
 }

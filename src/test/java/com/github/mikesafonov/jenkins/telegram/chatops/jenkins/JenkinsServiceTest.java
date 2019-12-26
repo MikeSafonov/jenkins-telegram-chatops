@@ -2,6 +2,11 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.ParametersDefinitionProperty;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.parameters.BooleanParameterDefinition;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.parameters.BooleanParameterValue;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.parameters.ParameterDefinition;
 import com.offbytwo.jenkins.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,9 +75,9 @@ public class JenkinsServiceTest {
         @Test
         void shouldThrowRunJobJenkinsApiExceptionBecauseIOException() throws IOException {
             String name = "name";
-            JobWithDetails job = mock(JobWithDetails.class);
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
 
-            when(jenkinsServerWrapper.getJobByName(name)).thenReturn(job);
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
             when(job.build(true)).thenThrow(IOException.class);
 
             assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(name));
@@ -80,12 +86,13 @@ public class JenkinsServiceTest {
         @Test
         void shouldThrowBuildDetailsNotFoundJenkinsApiExceptionBecauseIOException() throws IOException {
             String name = "name";
-            JobWithDetails job = mock(JobWithDetails.class);
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
             QueueReference queueReference = new QueueReference("location");
             QueueItem queueItem = mock(QueueItem.class);
             Build build = mock(Build.class);
 
-            when(jenkinsServerWrapper.getJobByName(name)).thenReturn(job);
+            when(job.getParametersDefinitionProperty()).thenReturn(Optional.empty());
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
             when(job.build(true)).thenReturn(queueReference);
             when(jenkinsServerWrapper.getQueueItem(queueReference)).thenReturn(queueItem);
             when(queueItem.isCancelled()).thenReturn(true);
@@ -96,15 +103,41 @@ public class JenkinsServiceTest {
         }
 
         @Test
+        void shouldThrowRunJobJenkinsApiExceptionBecauseExistParameterWithoutDefaultValue() throws IOException {
+            String name = "name";
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
+            QueueReference queueReference = new QueueReference("location");
+            QueueItem queueItem = mock(QueueItem.class);
+            Build build = mock(Build.class);
+            BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
+            ParametersDefinitionProperty parametersDefinitionProperty = mock(ParametersDefinitionProperty.class);
+            List<ParameterDefinition> parameterDefinitions = List.of(
+                    new BooleanParameterDefinition()
+            );
+
+            when(job.getParametersDefinitionProperty()).thenReturn(Optional.of(parametersDefinitionProperty));
+            when(parametersDefinitionProperty.getParameterDefinitions()).thenReturn(parameterDefinitions);
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
+            when(job.build(true)).thenReturn(queueReference);
+            when(jenkinsServerWrapper.getQueueItem(queueReference)).thenReturn(queueItem);
+            when(queueItem.isCancelled()).thenReturn(false);
+            when(jenkinsServerWrapper.getBuild(queueItem)).thenReturn(build);
+            when(build.details()).thenReturn(buildWithDetails);
+
+            assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(name));
+        }
+
+        @Test
         void shouldRunSuccess() throws IOException {
             String name = "name";
-            JobWithDetails job = mock(JobWithDetails.class);
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
             QueueReference queueReference = new QueueReference("location");
             QueueItem queueItem = mock(QueueItem.class);
             Build build = mock(Build.class);
             BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
 
-            when(jenkinsServerWrapper.getJobByName(name)).thenReturn(job);
+            when(job.getParametersDefinitionProperty()).thenReturn(Optional.empty());
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
             when(job.build(true)).thenReturn(queueReference);
             when(jenkinsServerWrapper.getQueueItem(queueReference)).thenReturn(queueItem);
             when(queueItem.isCancelled()).thenReturn(false);
@@ -112,9 +145,39 @@ public class JenkinsServiceTest {
             when(build.details()).thenReturn(buildWithDetails);
 
             assertEquals(buildWithDetails, jenkinsService.runJob(name));
-            verify(jenkinsWaitingService,  times(1)).waitUntilJobInQueue(name, queueReference);
-            verify(jenkinsWaitingService,  times(1)).waitUntilJobNotStarted(name, queueReference);
-            verify(jenkinsWaitingService,  times(1)).waitUntilJobIsBuilding(name, build);
+            verify(jenkinsWaitingService, times(1)).waitUntilJobInQueue(name, queueReference);
+            verify(jenkinsWaitingService, times(1)).waitUntilJobNotStarted(name, queueReference);
+            verify(jenkinsWaitingService, times(1)).waitUntilJobIsBuilding(name, build);
+            assertDoesNotThrow(() -> jenkinsService.runJob(name));
+        }
+
+        @Test
+        void shouldRunSuccessWithParameters() throws IOException {
+            String name = "name";
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
+            QueueReference queueReference = new QueueReference("location");
+            QueueItem queueItem = mock(QueueItem.class);
+            Build build = mock(Build.class);
+            BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
+            ParametersDefinitionProperty parametersDefinitionProperty = mock(ParametersDefinitionProperty.class);
+            List<ParameterDefinition> parameterDefinitions = List.of(
+                    new BooleanParameterDefinition(new BooleanParameterValue("class", "test", true))
+            );
+            Map<String, String> params = Map.of("test", "true");
+
+            when(job.getParametersDefinitionProperty()).thenReturn(Optional.of(parametersDefinitionProperty));
+            when(parametersDefinitionProperty.getParameterDefinitions()).thenReturn(parameterDefinitions);
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
+            when(job.build(params, true)).thenReturn(queueReference);
+            when(jenkinsServerWrapper.getQueueItem(queueReference)).thenReturn(queueItem);
+            when(queueItem.isCancelled()).thenReturn(false);
+            when(jenkinsServerWrapper.getBuild(queueItem)).thenReturn(build);
+            when(build.details()).thenReturn(buildWithDetails);
+
+            assertEquals(buildWithDetails, jenkinsService.runJob(name));
+            verify(jenkinsWaitingService, times(1)).waitUntilJobInQueue(name, queueReference);
+            verify(jenkinsWaitingService, times(1)).waitUntilJobNotStarted(name, queueReference);
+            verify(jenkinsWaitingService, times(1)).waitUntilJobIsBuilding(name, build);
             assertDoesNotThrow(() -> jenkinsService.runJob(name));
         }
     }
