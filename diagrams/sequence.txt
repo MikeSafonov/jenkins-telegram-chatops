@@ -1,0 +1,11 @@
+@startuml
+User -> TelegramBot: send /run <<job name>> request
+TelegramBot -> TelegramBot: save <<job name>> request to in-memory queue
+TelegramBot --> User: send `job registered` message
+TelegramBot -> Jenkins: get job <<job name>> details
+Jenkins --> TelegramBot : job <<job name>> details
+TelegramBot -> Jenkins : run build of job <<job name>>
+Jenkins --> TelegramBot: queue reference for build of job <<job name>>
+TelegramBot -> TelegramBot: wait until build of job <<job name>> is done
+TelegramBot --> User: notify about job is done
+@enduml
