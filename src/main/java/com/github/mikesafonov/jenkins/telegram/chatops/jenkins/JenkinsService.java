@@ -2,6 +2,7 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
 import com.offbytwo.jenkins.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,7 +50,7 @@ public class JenkinsService {
      * @return build details
      */
     public BuildWithDetails runJob(String jobName) {
-        JobWithDetails job = jenkinsServer.getJobByName(jobName);
+        JobWithDetailsWithProperties job = jenkinsServer.getJobByNameWithProperties(jobName);
         QueueReference queueReference = buildJob(job, jobName);
 
         jenkinsWaitingService.waitUntilJobInQueue(jobName, queueReference);

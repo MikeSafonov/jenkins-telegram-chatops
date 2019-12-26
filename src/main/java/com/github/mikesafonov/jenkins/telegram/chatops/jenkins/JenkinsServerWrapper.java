@@ -3,7 +3,10 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.JobNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.QueueItemNotFoundJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
 import com.offbytwo.jenkins.JenkinsServer;
+import com.offbytwo.jenkins.client.JenkinsHttpClient;
+import com.offbytwo.jenkins.client.util.UrlUtils;
 import com.offbytwo.jenkins.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +29,7 @@ public class JenkinsServerWrapper {
     static final String WORKFLOW_MULTIBRANCH_PROJECT_CLASS = "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject";
 
     private final JenkinsServer jenkinsServer;
+    private final JenkinsHttpClient jenkinsHttpClient;
 
     /**
      * @return map of jobs at the summary level or empty map if IOException throws
@@ -64,6 +68,16 @@ public class JenkinsServerWrapper {
                 throw new JobNotFoundJenkinsApiException(jobName);
             }
             return job;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new JobNotFoundJenkinsApiException(jobName, e);
+        }
+    }
+
+    public JobWithDetailsWithProperties getJobByNameWithProperties(String jobName) {
+        try {
+            var fullJobPath = UrlUtils.toFullJobPath(jobName);
+            return jenkinsHttpClient.get(UrlUtils.toJobBaseUrl(null, fullJobPath), JobWithDetailsWithProperties.class);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new JobNotFoundJenkinsApiException(jobName, e);

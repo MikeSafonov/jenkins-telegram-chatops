@@ -1,6 +1,9 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.offbytwo.jenkins.JenkinsServer;
+import com.offbytwo.jenkins.client.JenkinsHttpClient;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +13,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -23,11 +27,37 @@ import java.net.URISyntaxException;
 public class ApplicationConfiguration {
 
     @Bean
-    public JenkinsServer jenkinsServer(JenkinsInstanceProperties jenkinsInstanceProperties) throws URISyntaxException {
-        return new JenkinsServer(
+    public JenkinsHttpClient jenkinsHttpClient(JenkinsInstanceProperties jenkinsInstanceProperties) throws URISyntaxException {
+        JenkinsHttpClient client = new JenkinsHttpClient(
                 new URI(jenkinsInstanceProperties.getUrl()),
                 jenkinsInstanceProperties.getUsername(),
                 jenkinsInstanceProperties.getToken()
+        );
+
+        Field field = null;
+        try {
+            // hack for setting FAIL_ON_INVALID_SUBTYPE to false
+            field = JenkinsHttpClient.class.getDeclaredField("mapper");
+            field.setAccessible(true);
+            ObjectMapper objectMapper = (ObjectMapper) field.get(client);
+            objectMapper.disable(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY);
+            objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        } finally {
+            if (field != null) {
+                field.setAccessible(false);
+            }
+        }
+
+
+        return client;
+    }
+
+    @Bean
+    public JenkinsServer jenkinsServer(JenkinsHttpClient jenkinsHttpClient) {
+        return new JenkinsServer(
+                jenkinsHttpClient
         );
     }
 
