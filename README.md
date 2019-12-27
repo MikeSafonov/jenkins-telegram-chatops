@@ -73,7 +73,7 @@ locations:
 - a `/config` subdirectory of the current directory
 - the current directory
 
-#### Custom properties
+### Custom properties
 
 <dl> 
   <dt>jenkins.url</dt>
@@ -110,7 +110,7 @@ locations:
   <dd>the socket timeout in milliseconds, which is the timeout for waiting for data  or, put differently, a maximum period inactivity between two consecutive data packets)</dd>
 </dl>
 
-#### Retryable configuration for checking Jenkins jobs status
+### Retryable configuration for checking Jenkins jobs status
 
 When Jenkins job run via REST API `jenkins-telegram-chatops` waits until it finished.
 There are three steps :
@@ -148,6 +148,10 @@ Telegram bot supports following text commands:
 - **_/jobs_** - listing Jenkins jobs
 - **_/run_** <<*job name*>> - run <<*job name*>> Jenkins job
 - **_/help_** - prints help message
+
+### Running Jenkins jobs
+
+![sequence diagram](http://www.plantuml.com/plantuml/proxy?src=https://raw.github.com/MikeSafonov/jenkins-telegram-chatops/master/diagrams/sequence.txt)
 
 ## INTEGRATIONS 
 
