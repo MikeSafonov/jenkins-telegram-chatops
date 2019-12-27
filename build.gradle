@@ -115,6 +115,7 @@ pitest {
     testPlugin = "junit5"
     targetClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.bot.*",
                      "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*"]
+    excludedClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.*"]
     threads = 2
     outputFormats = ["XML", "HTML"]
     avoidCallsTo = ["org.apache.logging.log4j.Logger"]
