@@ -26,6 +26,10 @@ public class JenkinsJob {
         return originalJob;
     }
 
+    public String getUrl(){
+        return originalJob.getUrl();
+    }
+
     public boolean isBuildable() {
         try {
             return originalJob.details().isBuildable();

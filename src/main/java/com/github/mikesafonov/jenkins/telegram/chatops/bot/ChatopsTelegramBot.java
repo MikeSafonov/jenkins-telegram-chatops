@@ -2,7 +2,6 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.BuildableJobMessageWithKeyboard;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.api.FolderJobMessageWithKeyboard;
-import com.github.mikesafonov.jenkins.telegram.chatops.config.BuildInfo;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
 import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsJob;
@@ -13,7 +12,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -36,18 +34,18 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
     private final BotSecurityService botSecurityService;
     private final TelegramBotSender telegramBotSender;
     private final JobRunQueueService jobRunQueueService;
-    private final BuildInfo buildInfo;
+    private final MessageBuilderService messageBuilderService;
 
     public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties,
                               JenkinsService jenkinsService, BotSecurityService botSecurityService,
-                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService, BuildInfo buildInfo) {
+                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService, MessageBuilderService messageBuilderService) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
         this.jenkinsService = jenkinsService;
         this.botSecurityService = botSecurityService;
         this.telegramBotSender = telegramBotSender;
         this.jobRunQueueService = jobRunQueueService;
-        this.buildInfo = buildInfo;
+        this.messageBuilderService = messageBuilderService;
     }
 
     @Override
@@ -76,20 +74,15 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
             List<JenkinsJob> jobs = jenkinsService.getJobs();
             jobs.forEach(jenkinsJob -> processJob(telegramMessage.getChatId(), null, jenkinsJob));
         } else if (text.startsWith(RUN_COMMAND)) {
-            String jobName = text.replace(RUN_COMMAND, "");
+            String jobName = text.replace(RUN_COMMAND, "").strip();
             if (jobName.isBlank()) {
                 telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), "Please pass job name!");
             } else {
-                jobRunQueueService.registerJob(new JobToRun(jobName.strip(), telegramMessage.getChatId()));
+                jobRunQueueService.registerJob(new JobToRun(jobName, telegramMessage.getChatId()));
                 telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), "Job *" + jobName + "* registered to run");
             }
         } else if (text.equals(HELP_COMMAND)) {
-            telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(),
-                    "This is [jenkins-telegram-chatops](https://github.com/MikeSafonov/jenkins-telegram-chatops) version " + buildInfo.getVersion() +
-                            "\n\nSupported commands:\n" +
-                            "*/jobs* - listing Jenkins jobs\n" +
-                            "*/run* _jobName_ - running specific Jenkins job\n" +
-                            "*/help* - prints help message");
+            telegramBotSender.sendMarkdownTextMessage(telegramMessage.getChatId(), messageBuilderService.getHelpMessage());
         }
     }
 
@@ -111,40 +104,23 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
 
     private void processJob(Long chatId, String folderName, JenkinsJob jenkinsJob) {
         try {
-            String textMessage = buildMessageForJob(jenkinsJob);
+            String textMessage = messageBuilderService.buildMessageForJob(jenkinsJob);
             String jobName = JobNameBuilder.from(jenkinsJob)
                     .inFolder(folderName)
                     .build();
 
-            SendMessage message;
             if (jenkinsJob.isBuildable()) {
-                message = new BuildableJobMessageWithKeyboard(chatId, textMessage,
+                telegramBotSender.sendMethod(new BuildableJobMessageWithKeyboard(chatId, textMessage,
                         jobName,
-                        jenkinsJob.getOriginalJob().getUrl());
+                        jenkinsJob.getUrl()));
             } else {
-                message = new FolderJobMessageWithKeyboard(chatId, textMessage,
+                telegramBotSender.sendMethod(new FolderJobMessageWithKeyboard(chatId, textMessage,
                         jobName,
-                        jenkinsJob.getOriginalJob().getUrl());
+                        jenkinsJob.getUrl()));
             }
-            telegramBotSender.sendMethod(message);
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String buildMessageForJob(JenkinsJob jenkinsJob) {
-        boolean folder = jenkinsJob.isFolder();
-        StringBuilder stringBuilder = new StringBuilder();
-        if (folder) {
-            stringBuilder
-                    .append("\uD83D\uDDBF");
-        } else {
-            stringBuilder.append("⚫");
-        }
-        return stringBuilder
-                .append(jenkinsJob.getOriginalJob().getName())
-                .append("\n")
-                .toString();
     }
 
     @Override
