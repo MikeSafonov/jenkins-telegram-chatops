@@ -128,6 +128,31 @@ public class JenkinsServiceTest {
         }
 
         @Test
+        void shouldThrowBuildDetailsNotFoundJenkinsApiExceptionBecauseIOExceptionWithParameters() throws IOException {
+            String name = "name";
+            JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
+            QueueReference queueReference = new QueueReference("location");
+            QueueItem queueItem = mock(QueueItem.class);
+            Build build = mock(Build.class);
+            ParametersDefinitionProperty parametersDefinitionProperty = mock(ParametersDefinitionProperty.class);
+            List<ParameterDefinition> parameterDefinitions = List.of(
+                    new BooleanParameterDefinition(new BooleanParameterValue("class", "test", true))
+            );
+            Map<String, String> params = Map.of("test", "true");
+
+            when(job.getParametersDefinitionProperty()).thenReturn(Optional.of(parametersDefinitionProperty));
+            when(parametersDefinitionProperty.getParameterDefinitions()).thenReturn(parameterDefinitions);
+            when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
+            when(job.build(params, true)).thenThrow(IOException.class);
+            when(jenkinsServerWrapper.getQueueItem(queueReference)).thenReturn(queueItem);
+            when(queueItem.isCancelled()).thenReturn(true);
+            when(jenkinsServerWrapper.getBuild(queueItem)).thenReturn(build);
+            when(build.details()).thenThrow(IOException.class);
+
+            assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(name));
+        }
+
+        @Test
         void shouldRunSuccess() throws IOException {
             String name = "name";
             JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
