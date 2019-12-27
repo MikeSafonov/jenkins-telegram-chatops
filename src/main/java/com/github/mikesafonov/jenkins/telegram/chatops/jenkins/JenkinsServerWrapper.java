@@ -13,9 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -116,34 +114,5 @@ public class JenkinsServerWrapper {
             log.error(e.getMessage(), e);
             throw new BuildNotFoundJenkinsApiException(queueItem.getId(), e);
         }
-    }
-
-    public List<Job> getBuildableJobs() {
-        List<Job> buildableJobs = new ArrayList<>();
-        try {
-            Map<String, Job> jobs = jenkinsServer.getJobs();
-            collectBuildableJobsFromMap(jobs, buildableJobs);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return buildableJobs;
-    }
-
-    private void collectBuildableJobsFromMap(Map<String, Job> jobs, List<Job> collectList) {
-        jobs.forEach((s, job) -> {
-            try {
-                if (FOLDER_CLASS.equals(job.get_class())) {
-                    FolderJob folderJob = new FolderJob(job.getName(), job.getUrl());
-                    collectBuildableJobsFromMap(jenkinsServer.getJobs(folderJob), collectList);
-                } else {
-                    JobWithDetails details = job.details();
-                    if (details.isBuildable()) {
-                        collectList.add(job);
-                    }
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        });
     }
 }
