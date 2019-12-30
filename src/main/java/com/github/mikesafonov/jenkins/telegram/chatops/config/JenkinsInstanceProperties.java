@@ -14,4 +14,5 @@ public class JenkinsInstanceProperties {
     private String url;
     private String username;
     private String token;
+    private int poolSize = 10;
 }

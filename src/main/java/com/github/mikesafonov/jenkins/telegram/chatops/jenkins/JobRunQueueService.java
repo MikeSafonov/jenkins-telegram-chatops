@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -22,6 +24,7 @@ public class JobRunQueueService {
 
     private final JenkinsService jenkinsService;
     private final TelegramBotSender telegramBotSender;
+    private final Executor jobRunExecutor;
     private BlockingQueue<JobToRun> jobs = new LinkedBlockingQueue<>();
 
     /**
@@ -35,17 +38,17 @@ public class JobRunQueueService {
 
     @Scheduled(fixedDelay = 1000)
     public void runJobs() {
-        getJobsToRun().forEach(job -> {
-            try {
-                var build = jenkinsService.runJob(job.getJobName());
-                var message = "Build of *" + job.getJobName() + "* has been finished\nResult: *"
-                        + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(), message);
-            } catch (Exception e) {
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                        "Exception when running job *" + job.getJobName() + "*:\n" + e.getMessage());
-            }
-        });
+        getJobsToRun().forEach(job -> CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName()), jobRunExecutor)
+                .thenAccept(build -> {
+                    var message = "Build of *" + job.getJobName() + "* has been finished\nResult: *"
+                            + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
+                    telegramBotSender.sendMarkdownTextMessage(job.getUserId(), message);
+                })
+                .exceptionally(e -> {
+                    telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                            "Exception when running job *" + job.getJobName() + "*:\n" + e.getCause().getMessage());
+                    return null;
+                }));
     }
 
     /**

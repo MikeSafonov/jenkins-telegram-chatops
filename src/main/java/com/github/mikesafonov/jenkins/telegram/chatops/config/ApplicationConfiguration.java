@@ -16,6 +16,8 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author Mike Safonov
@@ -74,5 +76,10 @@ public class ApplicationConfiguration {
         }
         botOptions.setRequestConfig(builder.build());
         return botOptions;
+    }
+
+    @Bean
+    public Executor jobRunExecutor(JenkinsInstanceProperties properties){
+        return Executors.newFixedThreadPool(properties.getPoolSize());
     }
 }
