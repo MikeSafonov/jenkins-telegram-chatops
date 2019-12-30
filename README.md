@@ -83,7 +83,10 @@ locations:
   <dd>Jenkins username for REST API</dd>
   
   <dt>jenkins.token</dt>
-  <dd>Jenkins user`s token for REST API</dd>
+  <dd>Jenkins user`s password or token for REST API</dd>
+  
+  <dt>jenkins.poolSize</dt>
+  <dd>Size of FixedThreadPool</dd>
   
   <dt>telegram.bot.name</dt>
   <dd>telegram bot name</dd>
