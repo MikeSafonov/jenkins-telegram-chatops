@@ -13,7 +13,7 @@ buildscript {
 plugins {
     id "java"
     id "jacoco"
-    id "org.springframework.boot" version "2.2.2.RELEASE"
+    id "org.springframework.boot" version "2.2.4.RELEASE"
 }
 
 apply plugin: "info.solidsoft.pitest"
