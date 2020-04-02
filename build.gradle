@@ -75,7 +75,7 @@ dependencies {
     implementation("org.springframework.retry:spring-retry")
     implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
 
-    implementation("org.telegram:telegrambots-spring-boot-starter:4.6")
+    implementation("org.telegram:telegrambots-spring-boot-starter:4.7")
 
     implementation("io.micrometer:micrometer-core")
     implementation("io.micrometer:micrometer-registry-prometheus")
