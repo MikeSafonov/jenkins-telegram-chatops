@@ -48,7 +48,7 @@ public class ChatopsTelegramBotTest {
         jobRunQueueService = mock(JobRunQueueService.class);
         messageBuilderService = mock(MessageBuilderService.class);
         chatopsTelegramBot = new ChatopsTelegramBot(defaultBotOptions, telegramBotProperties, jenkinsService,
-                botSecurityService, telegramBotSender, jobRunQueueService, messageBuilderService);
+            botSecurityService, telegramBotSender, jobRunQueueService, messageBuilderService);
     }
 
     @Test
@@ -103,10 +103,10 @@ public class ChatopsTelegramBotTest {
         @Test
         void shouldSendHelpMessage() {
             String helpMessage = "This is [jenkins-telegram-chatops](https://github.com/MikeSafonov/jenkins-telegram-chatops) version 0.0.2" +
-                    "\n\nSupported commands:\n" +
-                    "*/jobs* - listing Jenkins jobs\n" +
-                    "*/run* _jobName_ - running specific Jenkins job\n" +
-                    "*/help* - prints help message";
+                "\n\nSupported commands:\n" +
+                "*/jobs* - listing Jenkins jobs\n" +
+                "*/run* _jobName_ - running specific Jenkins job\n" +
+                "*/help* - prints help message";
 
             Update update = mock(Update.class);
             Message message = mock(Message.class);
@@ -116,6 +116,31 @@ public class ChatopsTelegramBotTest {
             when(update.getMessage()).thenReturn(message);
             when(message.getChatId()).thenReturn(chatId);
             when(message.getText()).thenReturn("/help");
+            when(messageBuilderService.getHelpMessage()).thenReturn(helpMessage);
+
+            chatopsTelegramBot.onUpdateReceived(update);
+
+            verify(telegramBotSender).sendMarkdownTextMessage(chatId, helpMessage);
+        }
+
+        @Test
+        void shouldSendHelpMessageWhenHelpCommandWithBotName() {
+            String botName = "bot_test";
+            String helpMessage = "This is [jenkins-telegram-chatops](https://github.com/MikeSafonov/jenkins-telegram-chatops) version 0.0.2" +
+                "\n\nSupported commands:\n" +
+                "*/jobs* - listing Jenkins jobs\n" +
+                "*/run* _jobName_ - running specific Jenkins job\n" +
+                "*/help* - prints help message";
+
+            Update update = mock(Update.class);
+            Message message = mock(Message.class);
+            Long chatId = 1L;
+
+            when(botSecurityService.isAllowed(update)).thenReturn(true);
+            when(telegramBotProperties.getName()).thenReturn(botName);
+            when(update.getMessage()).thenReturn(message);
+            when(message.getChatId()).thenReturn(chatId);
+            when(message.getText()).thenReturn("/help@" + botName);
             when(messageBuilderService.getHelpMessage()).thenReturn(helpMessage);
 
             chatopsTelegramBot.onUpdateReceived(update);
@@ -194,8 +219,8 @@ public class ChatopsTelegramBotTest {
             verify(telegramBotSender, times(2)).sendMethod(argumentCaptor.capture());
             List<SendMessage> allValues = argumentCaptor.getAllValues();
             assertThat(allValues).containsOnly(
-                    new BuildableJobMessageWithKeyboard(chatId, "message1", "buildableJob", "buildableJobUrl"),
-                    new FolderJobMessageWithKeyboard(chatId, "message2", "folderJob", "folderJobUrl")
+                new BuildableJobMessageWithKeyboard(chatId, "message1", "buildableJob", "buildableJobUrl"),
+                new FolderJobMessageWithKeyboard(chatId, "message2", "folderJob", "folderJobUrl")
             );
         }
     }
@@ -243,8 +268,8 @@ public class ChatopsTelegramBotTest {
             verify(telegramBotSender, times(2)).sendMethod(argumentCaptor.capture());
             List<SendMessage> allValues = argumentCaptor.getAllValues();
             assertThat(allValues).containsOnly(
-                    new BuildableJobMessageWithKeyboard(chatId, "message1", folderName + "/buildableJob", "buildableJobUrl"),
-                    new FolderJobMessageWithKeyboard(chatId, "message2", folderName + "/folderJob", "folderJobUrl")
+                new BuildableJobMessageWithKeyboard(chatId, "message1", folderName + "/buildableJob", "buildableJobUrl"),
+                new FolderJobMessageWithKeyboard(chatId, "message2", folderName + "/folderJob", "folderJobUrl")
             );
         }
 

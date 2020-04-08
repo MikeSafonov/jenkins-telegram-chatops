@@ -70,6 +70,7 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
 
     private void handleCommand(Message telegramMessage) {
         String text = telegramMessage.getText();
+        text = text.replace("@" + telegramBotProperties.getName(), "");
         if (text.equals(JOBS_COMMAND)) {
             List<JenkinsJob> jobs = jenkinsService.getJobs();
             jobs.forEach(jenkinsJob -> processJob(telegramMessage.getChatId(), null, jenkinsJob));
