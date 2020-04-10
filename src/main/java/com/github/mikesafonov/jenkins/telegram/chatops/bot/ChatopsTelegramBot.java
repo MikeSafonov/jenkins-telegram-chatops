@@ -38,7 +38,8 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
 
     public ChatopsTelegramBot(DefaultBotOptions botOptions, TelegramBotProperties telegramBotProperties,
                               JenkinsService jenkinsService, BotSecurityService botSecurityService,
-                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService, MessageBuilderService messageBuilderService) {
+                              TelegramBotSender telegramBotSender, JobRunQueueService jobRunQueueService,
+                              MessageBuilderService messageBuilderService) {
         super(botOptions);
         this.telegramBotProperties = telegramBotProperties;
         this.jenkinsService = jenkinsService;
@@ -68,9 +69,18 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    @Override
+    public String getBotUsername() {
+        return telegramBotProperties.getName();
+    }
+
+    @Override
+    public String getBotToken() {
+        return telegramBotProperties.getToken();
+    }
+
     private void handleCommand(Message telegramMessage) {
-        String text = telegramMessage.getText();
-        text = text.replace("@" + telegramBotProperties.getName(), "");
+        String text = postProcessText(telegramMessage.getText());
         if (text.equals(JOBS_COMMAND)) {
             List<JenkinsJob> jobs = jenkinsService.getJobs();
             jobs.forEach(jenkinsJob -> processJob(telegramMessage.getChatId(), null, jenkinsJob));
@@ -124,13 +134,7 @@ public class ChatopsTelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    @Override
-    public String getBotUsername() {
-        return telegramBotProperties.getName();
-    }
-
-    @Override
-    public String getBotToken() {
-        return telegramBotProperties.getToken();
+    private String postProcessText(String text){
+        return text.replace("@" + telegramBotProperties.getName(), "");
     }
 }
