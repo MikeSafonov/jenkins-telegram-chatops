@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MessageBuilderService {
+    private static final String FOLDER_ICON = "\uD83D\uDDBF";
+    private static final String JOB_ICON = "⚫";
     private final BuildInfo buildInfo;
 
     public String getHelpMessage() {
@@ -22,17 +24,10 @@ public class MessageBuilderService {
     }
 
     public String buildMessageForJob(JenkinsJob jenkinsJob) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (jenkinsJob.isFolder()) {
-            stringBuilder
-                    .append("\uD83D\uDDBF");
-        } else {
-            stringBuilder.append("⚫");
-        }
-        return stringBuilder
-                .append(jenkinsJob.getOriginalJob().getName())
-                .append("\n")
-                .toString();
+        String icon = jenkinsJob.isFolder() ? FOLDER_ICON : JOB_ICON;
+        return icon +
+                jenkinsJob.getOriginalJob().getName() +
+                "\n";
     }
 }
 
