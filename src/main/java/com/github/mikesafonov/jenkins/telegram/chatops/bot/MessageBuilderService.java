@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MessageBuilderService {
-    private static final String FOLDER_ICON = "\uD83D\uDDBF";
-    private static final String JOB_ICON = "⚫";
+    private static final String FOLDER_ICON = "\uD83D\uDCC1";
+    private static final String JOB_ICON = "\uD83D\uDE80";
     private final BuildInfo buildInfo;
 
     public String getHelpMessage() {
