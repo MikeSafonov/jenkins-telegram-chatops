@@ -36,6 +36,10 @@ public class TelegramBotSender extends DefaultAbsSender {
         sendTextMessage(chatId, "⛔️ Unauthorized request");
     }
 
+    public void sendUnknownCommand(Long chatId, String command) {
+        sendTextMessage(chatId, "⚠️ Unknown command: " + command);
+    }
+
     public void sendTextMessage(Long chatId, String text) {
         sendTelegramMessage(new SendMessage(chatId, text));
     }

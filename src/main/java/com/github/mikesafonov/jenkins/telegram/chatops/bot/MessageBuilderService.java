@@ -26,8 +26,7 @@ public class MessageBuilderService {
     public String buildMessageForJob(JenkinsJob jenkinsJob) {
         String icon = jenkinsJob.isFolder() ? FOLDER_ICON : JOB_ICON;
         return icon +
-                jenkinsJob.getOriginalJob().getName() +
-                "\n";
+                jenkinsJob.getOriginalJob().getName();
     }
 }
 
