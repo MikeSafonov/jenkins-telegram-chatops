@@ -33,7 +33,7 @@ public class TelegramBotSender extends DefaultAbsSender {
     }
 
     public void sendUnauthorized(Long chatId) {
-        sendTextMessage(chatId, "Unauthorized request");
+        sendTextMessage(chatId, "⛔️ Unauthorized request");
     }
 
     public void sendTextMessage(Long chatId, String text) {
