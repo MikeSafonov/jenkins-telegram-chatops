@@ -96,6 +96,8 @@ dependencies {
         exclude group: "junit", module: "junit"
         exclude module: "junit-vintage-engine"
     }
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     testImplementation("org.assertj:assertj-core")
 }
