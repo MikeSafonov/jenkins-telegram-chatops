@@ -149,7 +149,10 @@ Each steps performs REST API calls in `maxAttempts` attempts with some `delay`.
 Telegram bot supports following text commands:
 
 - **_/jobs_** - listing Jenkins jobs
+- **_/jobs_** <<*folder name*>> - listing Jenkins jobs in specific folder
+- **_/jobs_\_**<<*folder name in HEX*>> - listing Jenkins jobs in specific folder
 - **_/run_** <<*job name*>> - run <<*job name*>> Jenkins job
+- **_/run_\_**<<*job name in HEX*>> - run <<*job name*>> Jenkins job
 - **_/help_** - prints help message
 
 ### Running Jenkins jobs
