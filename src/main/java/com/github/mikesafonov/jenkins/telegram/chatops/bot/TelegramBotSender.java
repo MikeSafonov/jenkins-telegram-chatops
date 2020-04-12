@@ -46,7 +46,7 @@ public class TelegramBotSender extends DefaultAbsSender {
 
     private void sendTelegramMessage(SendMessage sendMessage) {
         try {
-            sendApiMethod(sendMessage);
+            sendMethod(sendMessage);
         } catch (TelegramApiRequestException e) {
             log.error(e.toString(), e);
             sendUnableToSendRequest(sendMessage.getChatId());
@@ -58,7 +58,7 @@ public class TelegramBotSender extends DefaultAbsSender {
 
     private void sendUnableToSendRequest(String chatId) {
         try {
-            sendApiMethod(new SendMessage(chatId, "⚠️ Oops! Unable to send telegram message. Please look at logs for more information"));
+            sendMethod(new SendMessage(chatId, "⚠️ Oops! Unable to send telegram message. Please look at logs for more information"));
         } catch (TelegramApiException e) {
             log.error(e.getMessage(), e);
         }
