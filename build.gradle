@@ -1,22 +1,10 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    configurations.maybeCreate("pitest")
-
-    dependencies {
-        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.6"
-        pitest "org.pitest:pitest-junit5-plugin:0.12"
-    }
-}
-
 plugins {
     id "java"
     id "jacoco"
     id "org.springframework.boot" version "2.2.6.RELEASE"
+    id 'info.solidsoft.pitest' version '1.5.0'
 }
 
-apply plugin: "info.solidsoft.pitest"
 apply plugin: "io.spring.dependency-management"
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -114,7 +102,7 @@ jacocoTestReport {
 }
 
 pitest {
-    testPlugin = "junit5"
+    junit5PluginVersion = '0.12'
     targetClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.bot.*",
                      "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*"]
     excludedClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.*"]
