@@ -28,7 +28,7 @@ public class JenkinsService {
     private final JenkinsWaitingService jenkinsWaitingService;
 
     /**
-     * @return map of jobs at the summary level
+     * @return list of jobs at the summary level
      */
     public List<JenkinsJob> getJobs() {
         Map<String, Job> jobs = jenkinsServer.getJobs();
@@ -37,7 +37,7 @@ public class JenkinsService {
 
     /**
      * @param folder folder
-     * @return map of jobs in folder
+     * @return list of jobs in folder
      */
     public List<JenkinsJob> getJobsInFolder(String folder) {
         JobWithDetails job = jenkinsServer.getJobByName(folder);
