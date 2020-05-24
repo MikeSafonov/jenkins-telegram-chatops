@@ -5,6 +5,7 @@ import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJob
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
 import com.offbytwo.jenkins.model.*;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.client.HttpResponseException;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,17 @@ public class JenkinsService {
         JobWithDetails job = jenkinsServer.getJobByName(folder);
         Map<String, Job> jobs = jenkinsServer.getJobsByFolder(folder, job.getUrl());
         return mapJobs(jobs);
+    }
+
+    /**
+     *
+     * @param jobName job name
+     * @return last build of job
+     */
+    @SneakyThrows
+    public BuildWithDetails getLastBuild(String jobName){
+        JobWithDetails job = jenkinsServer.getJobByName(jobName);
+        return job.getLastBuild().details();
     }
 
     /**

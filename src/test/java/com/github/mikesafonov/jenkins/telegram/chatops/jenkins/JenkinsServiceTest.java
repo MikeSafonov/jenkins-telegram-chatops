@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -77,6 +78,34 @@ public class JenkinsServiceTest {
             assertTrue(originalJobs.contains(one));
             assertTrue(originalJobs.contains(two));
         }
+    }
+
+    @Nested
+    class GetLastBuild {
+
+        private JobWithDetails job;
+        private String name = "name";
+
+        @BeforeEach
+        void setUp() {
+            job = mock(JobWithDetails.class);
+            when(jenkinsServerWrapper.getJobByName(name)).thenReturn(job);
+        }
+
+        @Test
+        @SneakyThrows
+        void shouldReturnBuildWithDetails() {
+            Build build = mock(Build.class);
+            BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
+
+            when(job.getLastBuild()).thenReturn(build);
+            when(build.details()).thenReturn(buildWithDetails);
+
+            BuildWithDetails actual = jenkinsService.getLastBuild(name);
+
+            assertThat(actual).isEqualTo(buildWithDetails);
+        }
+
     }
 
 

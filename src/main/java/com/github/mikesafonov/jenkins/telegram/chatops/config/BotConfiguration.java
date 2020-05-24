@@ -51,6 +51,11 @@ public class BotConfiguration {
             .authorized()
             .action(new RunJobFromCommandAction(jobRunQueueService))
             .and()
+            .commandStartsWith("/last")
+            .args().length(1)
+            .authorized()
+            .action(new LastBuildAction(jenkinsService))
+            .and()
             .build();
     }
 }

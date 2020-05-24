@@ -153,6 +153,7 @@ Telegram bot supports following text commands:
 - **_/jobs_\_**<<*folder name in HEX*>> - listing Jenkins jobs in specific folder
 - **_/run_** <<*job name*>> <<*args*>> - run <<*job name*>> Jenkins job, args are array of `NAME=VALUE` pairs
 - **_/run_\_**<<*job name in HEX*>> - run <<*job name*>> Jenkins job
+- **_/last_** <<*jobName*>> - get last build info of specific Jenkins job
 - **_/help_** - prints help message
 
 ### Running Jenkins jobs

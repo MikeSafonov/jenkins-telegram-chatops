@@ -32,6 +32,7 @@ class MessageBuilderServiceTest {
                     "\n\nSupported commands:\n" +
                     "*/jobs* - listing Jenkins jobs\n" +
                     "*/run* _jobName_ - running specific Jenkins job\n" +
+                    "*/last* _jobName_ - get last build info of specific Jenkins job\n" +
                     "*/help* - prints help message";
 
             when(buildInfo.getVersion()).thenReturn("0.0.2");
