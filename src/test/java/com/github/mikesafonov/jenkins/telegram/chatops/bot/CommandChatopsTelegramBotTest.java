@@ -2,7 +2,6 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.Command;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.UpdateCheck;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -98,44 +97,12 @@ class CommandChatopsTelegramBotTest {
         class WhenNoOneMatch {
             @Test
             void shouldSendUnknownCommand() {
-                UpdateCheck updateCheck = mock(UpdateCheck.class);
-
-                when(updateCheck.support(any(Update.class))).thenReturn(false);
-
                 Command one = mock(Command.class);
                 Command two = mock(Command.class);
                 List<Command> commands = List.of(one, two);
 
-                when(one.getCommand()).thenReturn(updateCheck);
-                when(two.getCommand()).thenReturn(updateCheck);
-
-                CommandChatopsTelegramBot bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                        botSecurityService, telegramBotSender, commands);
-                Update update = mock(Update.class);
-                Message message = mock(Message.class);
-                when(update.getMessage()).thenReturn(message);
-                when(message.getChatId()).thenReturn(chatId);
-                when(message.getText()).thenReturn("command");
-
-                bot.onUpdateReceived(update);
-
-                verify(telegramBotSender).sendUnknownCommand(chatId, "command");
-            }
-        }
-
-        @Nested
-        class WhenArgsNotMatch {
-            @Test
-            void shouldSendUnknownCommand() {
-                UpdateCheck updateCheck = mock(UpdateCheck.class);
-
-                when(updateCheck.support(any(Update.class))).thenReturn(true);
-
-                Command one = mock(Command.class);
-                List<Command> commands = List.of(one);
-
-                when(one.getCommand()).thenReturn(updateCheck);
-                when(one.getArgsCount()).thenReturn(10);
+                when(one.isMatch(any(CommandContext.class))).thenReturn(false);
+                when(two.isMatch(any(CommandContext.class))).thenReturn(false);
 
                 CommandChatopsTelegramBot bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, commands);
@@ -158,12 +125,8 @@ class CommandChatopsTelegramBotTest {
 
             @BeforeEach
             void setUp() {
-                UpdateCheck updateCheck = mock(UpdateCheck.class);
-                when(updateCheck.support(any(Update.class))).thenReturn(true);
-
                 command = mock(Command.class);
-                when(command.getCommand()).thenReturn(updateCheck);
-                when(command.getArgsCount()).thenReturn(0);
+                when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
                 bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, List.of(command));
@@ -213,12 +176,8 @@ class CommandChatopsTelegramBotTest {
 
             @BeforeEach
             void setUp() {
-                UpdateCheck updateCheck = mock(UpdateCheck.class);
-                when(updateCheck.support(any(Update.class))).thenReturn(true);
-
                 command = mock(Command.class);
-                when(command.getCommand()).thenReturn(updateCheck);
-                when(command.getArgsCount()).thenReturn(0);
+                when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
                 bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, List.of(command));

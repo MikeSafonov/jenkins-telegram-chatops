@@ -13,12 +13,12 @@ import static org.mockito.Mockito.when;
 /**
  * @author Mike Safonov
  */
-class EqualsUpdateCheckTest {
-    private EqualsUpdateCheck check;
+class EqualsCommandMatcherTest {
+    private EqualsCommandMatcher matcher;
 
     @BeforeEach
     void setUp() {
-        check = new EqualsUpdateCheck("/help");
+        matcher = new EqualsCommandMatcher("/help");
     }
 
     @Test
@@ -27,8 +27,10 @@ class EqualsUpdateCheckTest {
         Message message = mock(Message.class);
         when(update.getMessage()).thenReturn(message);
         when(message.getText()).thenReturn("/help");
+        CommandContext context = mock(CommandContext.class);
+        when(context.getUpdate()).thenReturn(update);
 
-        assertTrue(check.support(update));
+        assertTrue(matcher.match(context));
     }
 
     @Test
@@ -37,15 +39,19 @@ class EqualsUpdateCheckTest {
         Message message = mock(Message.class);
         when(update.getMessage()).thenReturn(message);
         when(message.getText()).thenReturn("/run");
+        CommandContext context = mock(CommandContext.class);
+        when(context.getUpdate()).thenReturn(update);
 
-        assertFalse(check.support(update));
+        assertFalse(matcher.match(context));
     }
 
     @Test
     void shouldNotSupportWhenMessageIsNull() {
         Update update = mock(Update.class);
         when(update.getMessage()).thenReturn(null);
+        CommandContext context = mock(CommandContext.class);
+        when(context.getUpdate()).thenReturn(update);
 
-        assertFalse(check.support(update));
+        assertFalse(matcher.match(context));
     }
 }

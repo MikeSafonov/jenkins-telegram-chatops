@@ -1,19 +1,21 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
-import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
  * @author Mike Safonov
  */
-@AllArgsConstructor
-public class EqualsUpdateCheck implements UpdateCheck {
-    private String value;
+@Value
+@EqualsAndHashCode
+public class EqualsCommandMatcher extends BaseCommandMatcher {
+
+    private final String value;
 
     @Override
-    public boolean support(Update update) {
-        Message message = update.getMessage();
+    public boolean match(CommandContext context) {
+        Message message = context.getUpdate().getMessage();
         if (message != null) {
             return message.getText().equals(value);
         }

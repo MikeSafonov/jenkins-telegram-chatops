@@ -18,6 +18,7 @@ import java.util.Optional;
 @Log4j2
 @Service
 public class CommandChatopsTelegramBot extends TelegramLongPollingBot {
+
     private final TelegramBotProperties telegramBotProperties;
     private final BotSecurityService botSecurityService;
     private final TelegramBotSender sender;
@@ -64,12 +65,7 @@ public class CommandChatopsTelegramBot extends TelegramLongPollingBot {
 
     private Optional<Command> findCommand(CommandContext commandContext) {
         return commands.stream()
-                .filter(command -> isMatch(command, commandContext))
-                .findFirst();
-    }
-
-    private boolean isMatch(Command command, CommandContext commandContext) {
-        return command.getCommand().support(commandContext.getUpdate()) &&
-                command.getArgsCount() == commandContext.getArgs().length;
+            .filter(command -> command.isMatch(commandContext))
+            .findFirst();
     }
 }
