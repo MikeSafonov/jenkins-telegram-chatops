@@ -22,34 +22,34 @@ public class BotConfiguration {
         return List.of(
                 Command.builder()
                         .command(Command.equals("/help"))
-                        .authorized(true)
+                        .authorized()
                         .action(new SendHelpMessageAction(messageBuilderService))
                         .build(),
                 Command.builder()
                         .command(Command.equals("/jobs"))
-                        .authorized(true)
+                        .authorized()
                         .action(new RootJobsMessageAction(messageBuilderService, jenkinsService))
                         .build(),
                 Command.builder()
                         .command(Command.equals("/jobs"))
-                        .authorized(true)
+                        .authorized()
                         .argsCount(1)
                         .action(new JobsFromArgsAction(messageBuilderService, jenkinsService))
                         .build(),
                 Command.builder()
                         .command(Command.startsWith("/jobs_"))
-                        .authorized(true)
+                        .authorized()
                         .action(new JobsFromCommandAction(messageBuilderService, jenkinsService))
                         .build(),
                 Command.builder()
                         .command(Command.startsWith("/run"))
-                        .authorized(true)
+                        .authorized()
                         .argsCount(1)
                         .action(new RunJobFromArgsAction(jobRunQueueService))
                         .build(),
                 Command.builder()
                         .command(Command.startsWith("/run_"))
-                        .authorized(true)
+                        .authorized()
                         .action(new RunJobFromCommandAction(jobRunQueueService))
                         .build()
         );
