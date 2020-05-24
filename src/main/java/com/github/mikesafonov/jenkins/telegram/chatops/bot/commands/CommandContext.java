@@ -2,6 +2,7 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotSender;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
+import com.github.mikesafonov.jenkins.telegram.chatops.utils.ArrayUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @EqualsAndHashCode
 @ToString
 public class CommandContext {
+
     private final Update update;
     private final String commandText;
     private final String[] args;
@@ -42,9 +44,7 @@ public class CommandContext {
         if (commandWithArgs.length == 1) {
             return new String[0];
         } else {
-            String[] tmp = new String[commandWithArgs.length - 1];
-            System.arraycopy(commandWithArgs, 1, tmp, 0, commandWithArgs.length - 1);
-            return tmp;
+            return ArrayUtils.copyWithoutFirst(commandWithArgs);
         }
     }
 }
