@@ -2,6 +2,7 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotSender;
 import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
+import com.offbytwo.jenkins.model.BuildWithDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,16 +40,15 @@ public class JobRunQueueService {
     @Scheduled(fixedDelay = 1000)
     public void runJobs() {
         getJobsToRun().forEach(job -> CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName()), jobRunExecutor)
-                .thenAccept(build -> {
-                    var message = "Build of *" + job.getJobName() + "* has been finished\nResult: *"
-                            + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
-                    telegramBotSender.sendMarkdownTextMessage(job.getUserId(), message);
-                })
-                .exceptionally(e -> {
-                    telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                            "Exception when running job *" + job.getJobName() + "*:\n" + e.getCause().getMessage());
-                    return null;
-                }));
+            .thenAccept(build -> {
+                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                    createSuccessMessage(job, build));
+            })
+            .exceptionally(e -> {
+                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                    createExceptionallyMessage(job, e));
+                return null;
+            }));
     }
 
     /**
@@ -58,5 +58,14 @@ public class JobRunQueueService {
         var jobToRuns = new ArrayList<JobToRun>();
         jobs.drainTo(jobToRuns);
         return jobToRuns;
+    }
+
+    private String createSuccessMessage(JobToRun job, BuildWithDetails build) {
+        return "Build of *" + job.getJobName() + "* has been finished\nResult: *"
+            + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
+    }
+
+    private String createExceptionallyMessage(JobToRun job, Throwable e) {
+        return "Exception when running job *" + job.getJobName() + "*:\n" + e.getCause().getMessage();
     }
 }
