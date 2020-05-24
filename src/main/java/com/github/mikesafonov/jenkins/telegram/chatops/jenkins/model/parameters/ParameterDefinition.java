@@ -2,10 +2,14 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.parameters
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Mike Safonov
  */
+@Getter
+@Setter
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         property = "_class"
@@ -23,18 +27,6 @@ public abstract class ParameterDefinition {
     private String name;
     private String description;
     private String type;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getType() {
-        return type;
-    }
 
     public abstract ParameterValue getDefaultParameterValue();
 }

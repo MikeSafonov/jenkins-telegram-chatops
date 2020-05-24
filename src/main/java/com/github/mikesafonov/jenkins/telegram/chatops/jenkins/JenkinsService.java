@@ -10,7 +10,6 @@ import org.apache.http.client.HttpResponseException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +23,10 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class JenkinsService {
+
     private final JenkinsServerWrapper jenkinsServer;
     private final JenkinsWaitingService jenkinsWaitingService;
+    private final JobParametersResolver jobParametersResolver;
 
     /**
      * @return list of jobs at the summary level
@@ -48,29 +49,14 @@ public class JenkinsService {
     /**
      * Runs job with name {@code jobName} and wait until its finished
      *
-     * @param jobName Jenkins job name
+     * @param jobName       Jenkins job name
+     * @param jobParameters job parameters
      * @return build details
      */
-    public BuildWithDetails runJob(String jobName) {
+    public BuildWithDetails runJob(String jobName, Map<String, String> jobParameters) {
         JobWithDetailsWithProperties job = jenkinsServer.getJobByNameWithProperties(jobName);
-        QueueReference queueReference;
-        var parametersDefinitionProperty = job.getParametersDefinitionProperty();
-        if (parametersDefinitionProperty.isPresent()) {
-            var parameters = parametersDefinitionProperty.get();
-            var params = new HashMap<String, String>();
-            for (var definition : parameters.getParameterDefinitions()) {
-                var parameterValue = definition.getDefaultParameterValue();
-                if (parameterValue != null) {
-                    params.put(parameterValue.getName(), parameterValue.getValue().toString());
-                } else {
-                    throw new RunJobJenkinsApiException("Unable to run job " + jobName
-                            + ": no default value for parameter " + definition.getName());
-                }
-            }
-            queueReference = buildJob(job, jobName, params);
-        } else {
-            queueReference = buildJob(job, jobName);
-        }
+        Map<String, String> params = jobParametersResolver.resolve(job, jobParameters);
+        QueueReference queueReference = buildJob(job, jobName, params);
 
         jenkinsWaitingService.waitUntilJobInQueue(jobName, queueReference);
 
@@ -90,24 +76,15 @@ public class JenkinsService {
 
     private List<JenkinsJob> mapJobs(Map<String, Job> jobs) {
         return jobs.values().stream()
-                .map(JenkinsJob::new)
-                .collect(toList());
-    }
-
-    private QueueReference buildJob(JobWithDetails job, String jobName) {
-        try {
-            return job.build(true);
-        } catch (HttpResponseException e) {
-            log.error(e.getMessage(), e);
-            throw new RunJobJenkinsApiException("Unable to run job " + jobName + " : " + e.getMessage());
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new RunJobJenkinsApiException("Unable to run job " + jobName);
-        }
+            .map(JenkinsJob::new)
+            .collect(toList());
     }
 
     private QueueReference buildJob(JobWithDetails job, String jobName, Map<String, String> params) {
         try {
+            if (params.isEmpty()) {
+                return job.build(true);
+            }
             return job.build(params, true);
         } catch (HttpResponseException e) {
             log.error(e.getMessage(), e);
@@ -123,7 +100,7 @@ public class JenkinsService {
             return build.details();
         } catch (IOException e) {
             throw new BuildDetailsNotFoundJenkinsApiException("Unable to find details for job " + jobName +
-                    " and build N " + build.getNumber(), e);
+                " and build N " + build.getNumber(), e);
         }
     }
 }

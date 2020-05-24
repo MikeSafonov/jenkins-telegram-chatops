@@ -41,14 +41,14 @@ public class JobRunQueueServiceTest {
         var message = "Build of *" + job.getJobName() + "* has been finished\nResult: *"
                 + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
 
-        when(jenkinsService.runJob(job.getJobName())).thenReturn(build);
+        when(jenkinsService.runJob(job.getJobName(), job.getParameters())).thenReturn(build);
 
         jobRunQueueService.registerJob(job);
         jobRunQueueService.runJobs();
 
         executor.awaitTermination(1, TimeUnit.SECONDS);
 
-        verify(jenkinsService).runJob(job.getJobName());
+        verify(jenkinsService).runJob(job.getJobName(), job.getParameters());
         verify(telegramBotSender).sendMarkdownTextMessage(job.getUserId(), message);
     }
 
@@ -59,14 +59,14 @@ public class JobRunQueueServiceTest {
         var exception = new RuntimeException("exception message");
         var message = "Exception when running job *" + job.getJobName() + "*:\n" + exception.getMessage();
 
-        when(jenkinsService.runJob(job.getJobName())).thenThrow(exception);
+        when(jenkinsService.runJob(job.getJobName(), job.getParameters())).thenThrow(exception);
 
         jobRunQueueService.registerJob(job);
         jobRunQueueService.runJobs();
 
         executor.awaitTermination(1, TimeUnit.SECONDS);
 
-        verify(jenkinsService).runJob(job.getJobName());
+        verify(jenkinsService).runJob(job.getJobName(), job.getParameters());
         verify(telegramBotSender).sendMarkdownTextMessage(job.getUserId(), message);
     }
 

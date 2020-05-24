@@ -39,16 +39,7 @@ public class JobRunQueueService {
 
     @Scheduled(fixedDelay = 1000)
     public void runJobs() {
-        getJobsToRun().forEach(job -> CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName()), jobRunExecutor)
-            .thenAccept(build -> {
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                    createSuccessMessage(job, build));
-            })
-            .exceptionally(e -> {
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                    createExceptionallyMessage(job, e));
-                return null;
-            }));
+        getJobsToRun().forEach(this::doRunJob);
     }
 
     /**
@@ -58,6 +49,19 @@ public class JobRunQueueService {
         var jobToRuns = new ArrayList<JobToRun>();
         jobs.drainTo(jobToRuns);
         return jobToRuns;
+    }
+
+    private void doRunJob(JobToRun job) {
+        CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName(), job.getParameters()), jobRunExecutor)
+            .thenAccept(build -> {
+                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                    createSuccessMessage(job, build));
+            })
+            .exceptionally(e -> {
+                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                    createExceptionallyMessage(job, e));
+                return null;
+            });
     }
 
     private String createSuccessMessage(JobToRun job, BuildWithDetails build) {

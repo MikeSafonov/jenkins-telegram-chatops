@@ -5,6 +5,7 @@ import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobRunQueueService;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -12,12 +13,22 @@ import java.util.function.Consumer;
  */
 @RequiredArgsConstructor
 public abstract class BaseRunJobAction implements Consumer<CommandContext> {
+
     protected final JobRunQueueService jobRunQueueService;
+
+    protected void runJob(String jobName, CommandContext context, Map<String, String> parameters) {
+        Long chatId = context.getChatId();
+        doRunJob(context, new JobToRun(jobName, chatId, parameters));
+    }
 
     protected void runJob(String jobName, CommandContext context) {
         Long chatId = context.getChatId();
-        jobRunQueueService.registerJob(new JobToRun(jobName, chatId));
-        context.getSender().sendMarkdownTextMessage(chatId, "Job *" + jobName + "* registered to run");
+        doRunJob(context, new JobToRun(jobName, chatId));
     }
 
+    private void doRunJob(CommandContext context, JobToRun jobToRun) {
+        jobRunQueueService.registerJob(jobToRun);
+        context.getSender().sendMarkdownTextMessage(context.getChatId(),
+            "Job *" + jobToRun.getJobName() + "* registered to run");
+    }
 }

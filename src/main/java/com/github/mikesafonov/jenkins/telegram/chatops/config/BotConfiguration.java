@@ -1,5 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.config;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.ArgsParserService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.MessageBuilderService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.actions.*;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.Command;
@@ -20,7 +21,8 @@ public class BotConfiguration {
     @Bean
     public List<Command> commands(MessageBuilderService messageBuilderService,
                                   JenkinsService jenkinsService,
-                                  JobRunQueueService jobRunQueueService) {
+                                  JobRunQueueService jobRunQueueService,
+                                  ArgsParserService argsParserService) {
         CommandsBuilder builder = new CommandsBuilder();
         return builder.command("/help")
             .authorized()
@@ -43,7 +45,7 @@ public class BotConfiguration {
             .commandStartsWith("/run")
             .args().minLength(1)
             .authorized()
-            .action(new RunJobFromArgsAction(jobRunQueueService))
+            .action(new RunJobFromArgsAction(jobRunQueueService, argsParserService))
             .and()
             .commandStartsWith("/run_")
             .authorized()

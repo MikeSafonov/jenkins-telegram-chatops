@@ -1,5 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.action;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.ArgsParserService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotSender;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.actions.RunJobFromArgsAction;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
@@ -8,12 +9,17 @@ import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobRunQueueServic
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.Mockito.*;
 
 /**
  * @author Mike Safonov
  */
 class RunJobFromArgsActionTest {
+
+    private ArgsParserService argsParserService;
     private JobRunQueueService jobRunQueueService;
     private RunJobFromArgsAction action;
     private Long chatId;
@@ -22,8 +28,9 @@ class RunJobFromArgsActionTest {
 
     @BeforeEach
     void setUp() {
+        argsParserService = mock(ArgsParserService.class);
         jobRunQueueService = mock(JobRunQueueService.class);
-        action = new RunJobFromArgsAction(jobRunQueueService);
+        action = new RunJobFromArgsAction(jobRunQueueService, argsParserService);
 
         context = mock(CommandContext.class);
         telegramBotSender = mock(TelegramBotSender.class);
@@ -42,6 +49,7 @@ class RunJobFromArgsActionTest {
         action.accept(context);
 
         verify(jobRunQueueService).registerJob(job);
+        verifyNoInteractions(argsParserService);
     }
 
     @Test
@@ -49,5 +57,18 @@ class RunJobFromArgsActionTest {
         action.accept(context);
 
         verify(telegramBotSender).sendMarkdownTextMessage(chatId, "Job *test* registered to run");
+    }
+
+    @Test
+    void shouldRunJobWithParameters() {
+        Map<String, String> parsed = new HashMap<>();
+        when(context.getArgs()).thenReturn(new String[]{"test", "args"});
+        when(argsParserService.parse(new String[]{"args"})).thenReturn(parsed);
+
+        JobToRun job = new JobToRun("test", chatId, parsed);
+
+        action.accept(context);
+
+        verify(jobRunQueueService).registerJob(job);
     }
 }
