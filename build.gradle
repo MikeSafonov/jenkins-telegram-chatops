@@ -63,6 +63,8 @@ dependencies {
     implementation("org.springframework.retry:spring-retry")
     implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
 
+    implementation("org.hibernate:hibernate-validator:6.1.5.Final")
+
     implementation("org.telegram:telegrambots-spring-boot-starter:4.8.1")
 
     implementation("io.micrometer:micrometer-core")
