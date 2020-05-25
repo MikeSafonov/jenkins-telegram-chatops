@@ -8,4 +8,5 @@ comment:
 
 ignore:
   - "src/main/java/com/github/mikesafonov/jenkins/telegram/chatops/config/*"
+  - "src/main/java/com/github/mikesafonov/jenkins/telegram/chatops/jenkins/model/*"
   - "src/main/resources/*"
