@@ -28,9 +28,9 @@ public abstract class BaseJobsMessageAction implements Consumer<CommandContext> 
             stringBuilder.append(textMessage).append("\n");
 
             if (jenkinsJob.isBuildable()) {
-                stringBuilder.append("/run_").append(jobHex);
+                stringBuilder.append("/r_").append(jobHex);
             } else {
-                stringBuilder.append("/jobs_").append(jobHex);
+                stringBuilder.append("/j_").append(jobHex);
             }
             stringBuilder.append("\n\n");
         });

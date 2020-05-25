@@ -68,7 +68,7 @@ class JobsFromArgsActionTest {
 
         action.accept(context);
 
-        String expectedMessage = "message1\n/run_746573742F6275696C6461626C654A6F62\n\nmessage2\n/jobs_746573742F666F6C6465724A6F62\n\n";
+        String expectedMessage = "message1\n/r_746573742F6275696C6461626C654A6F62\n\nmessage2\n/j_746573742F666F6C6465724A6F62\n\n";
 
         verify(telegramBotSender).sendTextMessage(chatId, expectedMessage);
     }
