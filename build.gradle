@@ -104,7 +104,8 @@ jacocoTestReport {
 pitest {
     junit5PluginVersion = '0.12'
     targetClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.bot.*",
-                     "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*"]
+                     "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*",
+                     "com.github.mikesafonov.jenkins.telegram.chatops.utils.*"]
     excludedClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.*"]
     threads = 2
     outputFormats = ["XML", "HTML"]
