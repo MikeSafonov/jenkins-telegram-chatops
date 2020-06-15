@@ -15,7 +15,10 @@ public class RunJobFromCommandAction extends BaseRunJobAction {
 
     @Override
     public void accept(CommandContext context) {
-        String jobNameHex = context.getCommandText().replace("/run_", "");
+        String commandText = context.getCommandText();
+        String jobNameHex = commandText
+            .replace("/run_", "")
+            .replace("/r_", "");
         String jobName = HexUtils.fromHex(jobNameHex);
         runJob(jobName, context);
     }

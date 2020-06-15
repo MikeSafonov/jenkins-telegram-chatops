@@ -21,7 +21,10 @@ public class JobsFromCommandAction extends BaseJobsMessageAction {
 
     @Override
     public void accept(CommandContext context) {
-        String folderNameHex = context.getCommandText().replace("/jobs_", "");
+        String commandText = context.getCommandText();
+        String folderNameHex = commandText
+            .replace("/jobs_", "")
+            .replace("/j_", "");
         String folderName = HexUtils.fromHex(folderNameHex);
         List<JenkinsJob> jobs = jenkinsService.getJobsInFolder(folderName);
         sendJobsListMessage(context, folderName, jobs);
