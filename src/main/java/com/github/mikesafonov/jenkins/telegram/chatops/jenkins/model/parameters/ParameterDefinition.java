@@ -21,7 +21,8 @@ import lombok.Setter;
         @JsonSubTypes.Type(value = ChoiceParameterDefinition.class, name = ChoiceParameterDefinition.CLASS),
         @JsonSubTypes.Type(value = FileParameterDefinition.class, name = FileParameterDefinition.CLASS),
         @JsonSubTypes.Type(value = PasswordParameterDefinition.class, name = PasswordParameterDefinition.CLASS),
-        @JsonSubTypes.Type(value = RunParameterDefinition.class, name = RunParameterDefinition.CLASS)
+        @JsonSubTypes.Type(value = RunParameterDefinition.class, name = RunParameterDefinition.CLASS),
+        @JsonSubTypes.Type(value = GitParameterDefinition.class, name = GitParameterDefinition.CLASS)
 })
 public abstract class ParameterDefinition {
     private String name;
