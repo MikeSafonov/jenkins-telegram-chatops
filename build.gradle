@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "jacoco"
     id "org.springframework.boot" version "2.3.3.RELEASE"
-    id 'info.solidsoft.pitest' version '1.5.1'
+    id 'info.solidsoft.pitest' version '1.5.2'
 }
 
 apply plugin: "io.spring.dependency-management"
