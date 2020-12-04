@@ -41,11 +41,13 @@ public class TelegramBotSender extends DefaultAbsSender {
     }
 
     public void sendTextMessage(Long chatId, String text) {
-        sendTelegramMessage(new SendMessage(chatId, text));
+        sendTelegramMessage(new SendMessage(chatId.toString(), text));
     }
 
     public void sendMarkdownTextMessage(Long chatId, String text) {
-        sendTelegramMessage(new SendMessage(chatId, text).enableMarkdown(true));
+        SendMessage message = new SendMessage(chatId.toString(), text);
+        message.enableMarkdown(true);
+        sendTelegramMessage(message);
     }
 
     private void sendTelegramMessage(SendMessage sendMessage) {

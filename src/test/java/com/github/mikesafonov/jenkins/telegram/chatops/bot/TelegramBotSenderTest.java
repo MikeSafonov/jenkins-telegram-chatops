@@ -45,7 +45,7 @@ public class TelegramBotSenderTest {
         @Test
         @SneakyThrows
         void shouldSendMessage() {
-            SendMessage sendMessage = new SendMessage(chatId, "⛔️ Unauthorized request");
+            SendMessage sendMessage = new SendMessage(chatId.toString(), "⛔️ Unauthorized request");
 
             doReturn(null).when(spySender).sendMethod(any(SendMessage.class));
 
@@ -59,7 +59,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiRequestException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiRequestException.class).when(spySender).sendMethod(any(SendMessage.class));
@@ -72,7 +72,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiException.class).when(spySender).sendMethod(any(SendMessage.class));
@@ -91,7 +91,7 @@ public class TelegramBotSenderTest {
         @Test
         @SneakyThrows
         void shouldSendMessage() {
-            SendMessage sendMessage = new SendMessage(chatId, "⚠️ Unknown command: " + command);
+            SendMessage sendMessage = new SendMessage(chatId.toString(), "⚠️ Unknown command: " + command);
 
             doReturn(null).when(spySender).sendMethod(any(SendMessage.class));
 
@@ -105,7 +105,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiRequestException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiRequestException.class).when(spySender).sendMethod(any(SendMessage.class));
@@ -118,7 +118,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiException.class).when(spySender).sendMethod(any(SendMessage.class));
@@ -137,7 +137,8 @@ public class TelegramBotSenderTest {
         @Test
         @SneakyThrows
         void shouldSendMessage() {
-            SendMessage sendMessage = new SendMessage(chatId, message).enableMarkdown(true);
+            SendMessage sendMessage = new SendMessage(chatId.toString(), message);
+            sendMessage.enableMarkdown(true);
 
             doReturn(null).when(spySender).sendMethod(any(SendMessage.class));
 
@@ -151,7 +152,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiRequestException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiRequestException.class).when(spySender).sendMethod(any(SendMessage.class));
@@ -164,7 +165,7 @@ public class TelegramBotSenderTest {
             @Test
             @SneakyThrows
             void shouldSendUnableToSendRequestWhenTelegramApiException() {
-                SendMessage sendMessage = new SendMessage(chatId,
+                SendMessage sendMessage = new SendMessage(chatId.toString(),
                         "⚠️ Oops! Unable to send telegram message. Please look at logs for more information");
 
                 doThrow(TelegramApiException.class).when(spySender).sendMethod(any(SendMessage.class));
