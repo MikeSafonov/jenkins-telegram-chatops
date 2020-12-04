@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
  * @author Mike Safonov
  */
 @Value
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class StartsWithCommandMatcher extends BaseCommandMatcher {
 
     private final String value;

@@ -7,7 +7,7 @@ import lombok.Value;
  * @author Mike Safonov
  */
 @Value
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class NoArgsCommandMatcher extends BaseCommandMatcher {
 
     @Override

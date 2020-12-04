@@ -9,7 +9,7 @@ import java.util.List;
  * @author Mike Safonov
  */
 @Value
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class AndCommandMatcher extends BaseCommandMatcher {
 
     private final List<CommandMatcher> matchers;

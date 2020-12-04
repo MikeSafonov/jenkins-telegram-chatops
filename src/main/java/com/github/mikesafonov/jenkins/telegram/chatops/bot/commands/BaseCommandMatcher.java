@@ -1,10 +1,13 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.List;
 
 /**
  * @author Mike Safonov
  */
+@EqualsAndHashCode
 public abstract class BaseCommandMatcher implements CommandMatcher {
 
     @Override

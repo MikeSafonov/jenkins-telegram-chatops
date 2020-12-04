@@ -7,7 +7,7 @@ import lombok.Value;
  * @author Mike Safonov
  */
 @Value
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class ArgsLengthCommandMatcher extends BaseCommandMatcher {
 
     private final int expectedLength;
