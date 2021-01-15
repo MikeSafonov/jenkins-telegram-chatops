@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "jacoco"
-    id "org.springframework.boot" version "2.3.6.RELEASE"
+    id "org.springframework.boot" version "2.4.2"
     id 'info.solidsoft.pitest' version '1.5.2'
 }
 
