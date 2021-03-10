@@ -65,7 +65,7 @@ dependencies {
 
     implementation("org.hibernate:hibernate-validator:6.1.7.Final")
 
-    implementation("org.telegram:telegrambots-spring-boot-starter:5.0.1.1")
+    implementation("org.telegram:telegrambots-spring-boot-starter:5.1.0")
 
     implementation("io.micrometer:micrometer-core")
     implementation("io.micrometer:micrometer-registry-prometheus")
