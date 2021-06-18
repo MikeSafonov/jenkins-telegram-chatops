@@ -4,7 +4,6 @@ import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotPropert
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 
 /**
  * @author Mike Safonov
@@ -19,8 +18,8 @@ public class BotSecurityService {
             return isKnownUser(update.getMessage().getChatId());
         }
         if (update.getCallbackQuery() != null) {
-            User user = update.getCallbackQuery().getFrom();
-            return isKnownUser(Long.valueOf(user.getId()));
+            var user = update.getCallbackQuery().getFrom();
+            return isKnownUser(user.getId());
         }
         return false;
     }
