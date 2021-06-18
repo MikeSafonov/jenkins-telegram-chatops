@@ -1,8 +1,5 @@
 # Jenkins telegram chatops
-[![codecov](https://codecov.io/gh/MikeSafonov/jenkins-telegram-chatops/branch/master/graph/badge.svg)](https://codecov.io/gh/MikeSafonov/jenkins-telegram-chatops)
-[![Build Status](https://travis-ci.com/MikeSafonov/jenkins-telegram-chatops.svg?branch=master)](https://travis-ci.com/MikeSafonov/jenkins-telegram-chatops)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MikeSafonov_jenkins-telegram-chatops&metric=alert_status)](https://sonarcloud.io/dashboard?id=MikeSafonov_jenkins-telegram-chatops)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MikeSafonov_jenkins-telegram-chatops&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=MikeSafonov_jenkins-telegram-chatops)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=MikeSafonov_jenkins-telegram-chatops&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=MikeSafonov_jenkins-telegram-chatops)
