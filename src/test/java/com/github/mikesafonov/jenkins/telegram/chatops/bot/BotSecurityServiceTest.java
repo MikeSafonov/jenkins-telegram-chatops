@@ -58,7 +58,7 @@ public class BotSecurityServiceTest {
         when(telegramBotProperties.getUsers()).thenReturn(List.of(2L, 3L));
         when(update.getMessage()).thenReturn(null);
         when(query.getFrom()).thenReturn(user);
-        when(user.getId()).thenReturn(1);
+        when(user.getId()).thenReturn(1L);
         when(update.getCallbackQuery()).thenReturn(query);
 
         assertFalse(botSecurityService.isAllowed(update));
@@ -85,7 +85,7 @@ public class BotSecurityServiceTest {
         when(telegramBotProperties.getUsers()).thenReturn(List.of(1L, 3L));
         when(update.getMessage()).thenReturn(null);
         when(query.getFrom()).thenReturn(user);
-        when(user.getId()).thenReturn(1);
+        when(user.getId()).thenReturn(1L);
         when(update.getCallbackQuery()).thenReturn(query);
 
         assertTrue(botSecurityService.isAllowed(update));
