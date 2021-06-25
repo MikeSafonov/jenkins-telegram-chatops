@@ -17,14 +17,14 @@ import java.util.Optional;
  */
 @Log4j2
 @Service
-public class CommandChatopsTelegramBot extends TelegramLongPollingBot {
+public class JenkinsChatopsTelegramBot extends TelegramLongPollingBot {
 
     private final TelegramBotProperties telegramBotProperties;
     private final BotSecurityService botSecurityService;
     private final TelegramBotSender sender;
     private final List<Command> commands;
 
-    public CommandChatopsTelegramBot(DefaultBotOptions options,
+    public JenkinsChatopsTelegramBot(DefaultBotOptions options,
                                      TelegramBotProperties telegramBotProperties,
                                      BotSecurityService botSecurityService,
                                      TelegramBotSender sender,

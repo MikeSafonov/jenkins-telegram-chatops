@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Mike Safonov
  */
-class CommandChatopsTelegramBotTest {
+class JenkinsChatopsTelegramBotTest {
     private DefaultBotOptions defaultBotOptions;
     private TelegramBotProperties telegramBotProperties;
     private BotSecurityService botSecurityService;
@@ -37,11 +37,11 @@ class CommandChatopsTelegramBotTest {
 
     @Nested
     class GetBotToken {
-        private CommandChatopsTelegramBot telegramBot;
+        private JenkinsChatopsTelegramBot telegramBot;
 
         @BeforeEach
         void setUp() {
-            telegramBot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+            telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                     botSecurityService, telegramBotSender, Collections.emptyList());
         }
 
@@ -55,11 +55,11 @@ class CommandChatopsTelegramBotTest {
 
     @Nested
     class GetBotUsername {
-        private CommandChatopsTelegramBot telegramBot;
+        private JenkinsChatopsTelegramBot telegramBot;
 
         @BeforeEach
         void setUp() {
-            telegramBot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+            telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                     botSecurityService, telegramBotSender, Collections.emptyList());
         }
 
@@ -79,7 +79,7 @@ class CommandChatopsTelegramBotTest {
         class WhenNoCommands {
             @Test
             void shouldSendUnknownCommand() {
-                CommandChatopsTelegramBot bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                JenkinsChatopsTelegramBot bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, Collections.emptyList());
                 Update update = mock(Update.class);
                 Message message = mock(Message.class);
@@ -104,7 +104,7 @@ class CommandChatopsTelegramBotTest {
                 when(one.isMatch(any(CommandContext.class))).thenReturn(false);
                 when(two.isMatch(any(CommandContext.class))).thenReturn(false);
 
-                CommandChatopsTelegramBot bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                JenkinsChatopsTelegramBot bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, commands);
                 Update update = mock(Update.class);
                 Message message = mock(Message.class);
@@ -121,14 +121,14 @@ class CommandChatopsTelegramBotTest {
         @Nested
         class WhenUnauthorized {
             private Command command;
-            private CommandChatopsTelegramBot bot;
+            private JenkinsChatopsTelegramBot bot;
 
             @BeforeEach
             void setUp() {
                 command = mock(Command.class);
                 when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
-                bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, List.of(command));
 
                 when(botSecurityService.isAllowed(any(Update.class))).thenReturn(false);
@@ -172,14 +172,14 @@ class CommandChatopsTelegramBotTest {
         @Nested
         class WhenAuthorized {
             private Command command;
-            private CommandChatopsTelegramBot bot;
+            private JenkinsChatopsTelegramBot bot;
 
             @BeforeEach
             void setUp() {
                 command = mock(Command.class);
                 when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
-                bot = new CommandChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
                         botSecurityService, telegramBotSender, List.of(command));
 
                 when(botSecurityService.isAllowed(any(Update.class))).thenReturn(true);
