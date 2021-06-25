@@ -30,7 +30,7 @@ public class ApplicationConfiguration {
 
     @Bean
     public JenkinsHttpClient jenkinsHttpClient(JenkinsInstanceProperties jenkinsInstanceProperties) throws URISyntaxException {
-        JenkinsHttpClient client = new JenkinsHttpClient(
+        var client = new JenkinsHttpClient(
                 new URI(jenkinsInstanceProperties.getUrl()),
                 jenkinsInstanceProperties.getUsername(),
                 jenkinsInstanceProperties.getToken()
@@ -41,7 +41,7 @@ public class ApplicationConfiguration {
             // hack for setting FAIL_ON_INVALID_SUBTYPE to false
             field = JenkinsHttpClient.class.getDeclaredField("mapper");
             field.setAccessible(true);
-            ObjectMapper objectMapper = (ObjectMapper) field.get(client);
+            var objectMapper = (ObjectMapper) field.get(client);
             objectMapper.disable(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY);
             objectMapper.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -65,14 +65,14 @@ public class ApplicationConfiguration {
 
     @Bean
     public DefaultBotOptions botOptions(TelegramBotProperties telegramBotProperties) {
-        DefaultBotOptions botOptions = new DefaultBotOptions();
-        RequestConfig.Builder builder = RequestConfig.custom()
+        var botOptions = new DefaultBotOptions();
+        var builder = RequestConfig.custom()
                 .setSocketTimeout(telegramBotProperties.getSocketTimeout())
                 .setConnectionRequestTimeout(telegramBotProperties.getConnectionRequestTimeout())
                 .setConnectTimeout(telegramBotProperties.getConnectionTimeout());
         if (telegramBotProperties.getProxyHost() != null && telegramBotProperties.getProxyPort() != null) {
-            HttpHost httpHost = new HttpHost(telegramBotProperties.getProxyHost(), telegramBotProperties.getProxyPort());
-            builder = builder.setProxy(httpHost);
+            var httpHost = new HttpHost(telegramBotProperties.getProxyHost(), telegramBotProperties.getProxyPort());
+            builder.setProxy(httpHost);
         }
         botOptions.setRequestConfig(builder.build());
         return botOptions;
