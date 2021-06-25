@@ -2,7 +2,6 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
  * @author Mike Safonov
@@ -15,10 +14,7 @@ public class StartsWithCommandMatcher extends BaseCommandMatcher {
 
     @Override
     public boolean match(CommandContext context) {
-        Message message = context.getUpdate().getMessage();
-        if (message != null) {
-            return message.getText().startsWith(value);
-        }
-        return false;
+        var message = context.getUpdate().getMessage();
+        return message != null && message.getText().startsWith(value);
     }
 }
