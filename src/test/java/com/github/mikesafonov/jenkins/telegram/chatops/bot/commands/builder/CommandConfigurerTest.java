@@ -42,39 +42,6 @@ class CommandConfigurerTest {
     }
 
     @Nested
-    class Authorized {
-
-        @Test
-        void shouldSetUpAuthorized() {
-            commandConfigurer.authorized();
-
-            assertThat(commandConfigurer).extracting("isAuthorized").isEqualTo(true);
-        }
-
-        @Test
-        void shouldReturnSelf() {
-            assertThat(commandConfigurer.authorized()).isEqualTo(commandConfigurer);
-        }
-    }
-
-    @Nested
-    class Unauthorized {
-
-        @Test
-        void shouldSetUpUnauthorized() {
-            commandConfigurer.authorized();
-            commandConfigurer.unauthorized();
-
-            assertThat(commandConfigurer).extracting("isAuthorized").isEqualTo(false);
-        }
-
-        @Test
-        void shouldReturnSelf() {
-            assertThat(commandConfigurer.unauthorized()).isEqualTo(commandConfigurer);
-        }
-    }
-
-    @Nested
     class Args {
 
         @Test
@@ -113,11 +80,11 @@ class CommandConfigurerTest {
         @Test
         void shouldRegisterCommand() {
 
-            commandConfigurer.authorized()
+            commandConfigurer
                 .action(action)
                 .and();
 
-            Command command = new Command(true, new AndCommandMatcher(List.of(initMatcher)), action);
+            Command command = new Command(new AndCommandMatcher(List.of(initMatcher)), action);
 
             verify(builder).registerCommand(command);
 

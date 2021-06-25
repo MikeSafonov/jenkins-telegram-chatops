@@ -19,13 +19,11 @@ public class CommandContext {
     private final Update update;
     private final String commandText;
     private final String[] args;
-    private final boolean authorized;
     private final TelegramBotSender sender;
 
-    public CommandContext(Update update, boolean authorized,
+    public CommandContext(Update update,
                           TelegramBotSender sender, TelegramBotProperties telegramBotProperties) {
         this.update = update;
-        this.authorized = authorized;
         this.commandText = postProcessText(telegramBotProperties, update.getMessage().getText());
         this.args = parseArgs();
         this.sender = sender;

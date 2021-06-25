@@ -20,7 +20,7 @@ class CommandTest {
         when(matcher.match(commandContext)).thenReturn(true);
 
 
-        Command command = new Command(false, matcher, context -> {
+        Command command = new Command(matcher, context -> {
         });
 
         assertTrue(command.isMatch(commandContext));
@@ -34,7 +34,7 @@ class CommandTest {
         when(matcher.match(commandContext)).thenReturn(false);
 
 
-        Command command = new Command(false, matcher, context -> {
+        Command command = new Command(matcher, context -> {
         });
 
         assertFalse(command.isMatch(commandContext));

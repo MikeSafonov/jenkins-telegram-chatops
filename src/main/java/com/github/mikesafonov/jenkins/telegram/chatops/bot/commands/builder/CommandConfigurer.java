@@ -16,23 +16,12 @@ public class CommandConfigurer {
 
     private CommandsBuilder builder;
     private List<CommandMatcher> matchers;
-    private boolean isAuthorized;
     private Consumer<CommandContext> commandAction;
 
     public CommandConfigurer(CommandsBuilder builder, CommandMatcher matcher) {
         this.builder = builder;
         this.matchers = new ArrayList<>();
         matchers.add(matcher);
-    }
-
-    public CommandConfigurer authorized() {
-        this.isAuthorized = true;
-        return this;
-    }
-
-    public CommandConfigurer unauthorized() {
-        this.isAuthorized = false;
-        return this;
     }
 
     public CommandConfigurer action(Consumer<CommandContext> action) {
@@ -45,8 +34,8 @@ public class CommandConfigurer {
     }
 
     public CommandsBuilder and() {
-        AndCommandMatcher andCommandMatcher = new AndCommandMatcher(matchers);
-        Command command = new Command(isAuthorized, andCommandMatcher, commandAction);
+        var andCommandMatcher = new AndCommandMatcher(matchers);
+        var command = new Command(andCommandMatcher, commandAction);
         builder.registerCommand(command);
         return builder;
     }

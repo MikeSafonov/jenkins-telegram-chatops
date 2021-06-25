@@ -36,7 +36,7 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help@bot");
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertEquals("/help", commandContext.getCommandText());
     }
@@ -49,7 +49,7 @@ class CommandContextTest {
         when(message.getText()).thenReturn("/help@bot");
         when(message.getChatId()).thenReturn(chatId);
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertEquals(chatId, commandContext.getChatId());
     }
@@ -59,7 +59,7 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help one two");
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertThat(commandContext.getArgs()).containsExactly("one", "two");
     }
@@ -69,7 +69,7 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help");
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertThat(commandContext.getArgs()).isEmpty();
     }
@@ -79,7 +79,7 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help one two");
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertEquals(update, commandContext.getUpdate());
     }
@@ -89,7 +89,7 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help one two");
 
-        CommandContext commandContext = new CommandContext(update, true, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
 
         assertEquals(sender, commandContext.getSender());
     }

@@ -26,6 +26,7 @@ class JenkinsChatopsTelegramBotTest {
     private TelegramBotProperties telegramBotProperties;
     private BotSecurityService botSecurityService;
     private TelegramBotSender telegramBotSender;
+    private JenkinsChatopsTelegramBot telegramBot;
 
     @BeforeEach
     void setUp() {
@@ -73,49 +74,12 @@ class JenkinsChatopsTelegramBotTest {
 
     @Nested
     class OnUpdateReceived {
-        private Long chatId = 1L;
+        private final Long chatId = 1L;
 
-        @Nested
-        class WhenNoCommands {
-            @Test
-            void shouldSendUnknownCommand() {
-                JenkinsChatopsTelegramBot bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                        botSecurityService, telegramBotSender, Collections.emptyList());
-                Update update = mock(Update.class);
-                Message message = mock(Message.class);
-                when(update.getMessage()).thenReturn(message);
-                when(message.getChatId()).thenReturn(chatId);
-                when(message.getText()).thenReturn("command");
-
-                bot.onUpdateReceived(update);
-
-                verify(telegramBotSender).sendUnknownCommand(chatId, "command");
-            }
-        }
-
-        @Nested
-        class WhenNoOneMatch {
-            @Test
-            void shouldSendUnknownCommand() {
-                Command one = mock(Command.class);
-                Command two = mock(Command.class);
-                List<Command> commands = List.of(one, two);
-
-                when(one.isMatch(any(CommandContext.class))).thenReturn(false);
-                when(two.isMatch(any(CommandContext.class))).thenReturn(false);
-
-                JenkinsChatopsTelegramBot bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                        botSecurityService, telegramBotSender, commands);
-                Update update = mock(Update.class);
-                Message message = mock(Message.class);
-                when(update.getMessage()).thenReturn(message);
-                when(message.getChatId()).thenReturn(chatId);
-                when(message.getText()).thenReturn("command");
-
-                bot.onUpdateReceived(update);
-
-                verify(telegramBotSender).sendUnknownCommand(chatId, "command");
-            }
+        @BeforeEach
+        void setUp() {
+            telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                    botSecurityService, telegramBotSender, Collections.emptyList());
         }
 
         @Nested
@@ -135,9 +99,7 @@ class JenkinsChatopsTelegramBotTest {
             }
 
             @Test
-            void shouldSendUnauthorizedWhenCommandRequiresAuthorization() {
-                when(command.isAuthorized()).thenReturn(true);
-
+            void shouldSendUnauthorized() {
                 Update update = mock(Update.class);
                 Message message = mock(Message.class);
                 when(update.getMessage()).thenReturn(message);
@@ -147,25 +109,6 @@ class JenkinsChatopsTelegramBotTest {
                 bot.onUpdateReceived(update);
 
                 verify(telegramBotSender).sendUnauthorized(chatId);
-            }
-
-            @Test
-            void shouldCallActionWhenCommandNotRequiresAuthorization() {
-                Consumer<CommandContext> action = mock(Consumer.class);
-                when(command.getAction()).thenReturn(action);
-                when(command.isAuthorized()).thenReturn(false);
-
-                Update update = mock(Update.class);
-                Message message = mock(Message.class);
-                when(update.getMessage()).thenReturn(message);
-                when(message.getChatId()).thenReturn(chatId);
-                when(message.getText()).thenReturn("command");
-
-                CommandContext commandContext = new CommandContext(update, false, telegramBotSender, telegramBotProperties);
-
-                bot.onUpdateReceived(update);
-
-                verify(action).accept(commandContext);
             }
         }
 
@@ -186,10 +129,9 @@ class JenkinsChatopsTelegramBotTest {
             }
 
             @Test
-            void shouldCallActionWhenCommandRequiresAuthorization() {
+            void shouldCallAction() {
                 Consumer<CommandContext> action = mock(Consumer.class);
                 when(command.getAction()).thenReturn(action);
-                when(command.isAuthorized()).thenReturn(true);
 
                 Update update = mock(Update.class);
                 Message message = mock(Message.class);
@@ -197,30 +139,36 @@ class JenkinsChatopsTelegramBotTest {
                 when(message.getChatId()).thenReturn(chatId);
                 when(message.getText()).thenReturn("command");
 
-                CommandContext commandContext = new CommandContext(update, true, telegramBotSender, telegramBotProperties);
+                CommandContext commandContext = new CommandContext(update, telegramBotSender, telegramBotProperties);
 
                 bot.onUpdateReceived(update);
 
                 verify(action).accept(commandContext);
             }
 
-            @Test
-            void shouldCallActionWhenCommandNotRequiresAuthorization() {
-                Consumer<CommandContext> action = mock(Consumer.class);
-                when(command.getAction()).thenReturn(action);
-                when(command.isAuthorized()).thenReturn(false);
+            @Nested
+            class WhenNoOneMatch {
+                @Test
+                void shouldSendUnknownCommand() {
+                    Command one = mock(Command.class);
+                    Command two = mock(Command.class);
+                    List<Command> commands = List.of(one, two);
 
-                Update update = mock(Update.class);
-                Message message = mock(Message.class);
-                when(update.getMessage()).thenReturn(message);
-                when(message.getChatId()).thenReturn(chatId);
-                when(message.getText()).thenReturn("command");
+                    when(one.isMatch(any(CommandContext.class))).thenReturn(false);
+                    when(two.isMatch(any(CommandContext.class))).thenReturn(false);
 
-                CommandContext commandContext = new CommandContext(update, true, telegramBotSender, telegramBotProperties);
+                    var bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
+                            botSecurityService, telegramBotSender, commands);
+                    Update update = mock(Update.class);
+                    Message message = mock(Message.class);
+                    when(update.getMessage()).thenReturn(message);
+                    when(message.getChatId()).thenReturn(chatId);
+                    when(message.getText()).thenReturn("command");
 
-                bot.onUpdateReceived(update);
+                    bot.onUpdateReceived(update);
 
-                verify(action).accept(commandContext);
+                    verify(telegramBotSender).sendUnknownCommand(chatId, "command");
+                }
             }
         }
     }

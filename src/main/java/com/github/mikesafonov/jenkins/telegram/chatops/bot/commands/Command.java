@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 @AllArgsConstructor
 public class Command {
 
-    private boolean authorized;
     private CommandMatcher matcher;
     private Consumer<CommandContext> action;
 

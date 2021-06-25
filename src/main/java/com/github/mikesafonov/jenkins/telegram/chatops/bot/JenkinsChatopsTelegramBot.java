@@ -49,17 +49,13 @@ public class JenkinsChatopsTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         boolean authorized = botSecurityService.isAllowed(update);
-        CommandContext context = new CommandContext(update, authorized, sender, telegramBotProperties);
-        Optional<Command> commandToRun = findCommand(context);
-        if (commandToRun.isPresent()) {
-            Command command = commandToRun.get();
-            if (Boolean.compare(command.isAuthorized(), context.isAuthorized()) > 0) {
-                sender.sendUnauthorized(context.getChatId());
-            } else {
-                command.getAction().accept(context);
-            }
+        var context = new CommandContext(update, sender, telegramBotProperties);
+        if (!authorized) {
+            sender.sendUnauthorized(context.getChatId());
         } else {
-            sender.sendUnknownCommand(context.getChatId(), context.getCommandText());
+            findCommand(context)
+                    .ifPresentOrElse(command -> command.getAction().accept(context),
+                            () -> sender.sendUnknownCommand(context.getChatId(), context.getCommandText()));
         }
     }
 
