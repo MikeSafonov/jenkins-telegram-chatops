@@ -17,7 +17,7 @@ public class ChoiceParameterDefinition extends ParameterDefinition {
 
     @Override
     public StringParameterValue getDefaultParameterValue() {
-        return null;
+        return defaultParameterValue;
     }
 
     @Override
