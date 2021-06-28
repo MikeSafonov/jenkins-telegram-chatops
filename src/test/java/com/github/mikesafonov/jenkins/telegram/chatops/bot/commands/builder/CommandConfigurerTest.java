@@ -42,17 +42,6 @@ class CommandConfigurerTest {
     }
 
     @Nested
-    class Args {
-
-        @Test
-        void shouldReturnArgsConfigurer() {
-            ArgsConfigurer configurer = commandConfigurer.args();
-
-            assertThat(configurer).extracting("commandConfigurer").isEqualTo(commandConfigurer);
-        }
-    }
-
-    @Nested
     class Action {
 
         private Consumer<CommandContext> action = context -> {

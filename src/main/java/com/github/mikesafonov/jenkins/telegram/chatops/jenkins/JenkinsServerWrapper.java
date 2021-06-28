@@ -24,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JenkinsServerWrapper {
     static final String FOLDER_CLASS = "com.cloudbees.hudson.plugins.folder.Folder";
+    static final String BRANCH_FOLDER_CLASS = "jenkins.branch.OrganizationFolder";
     static final String WORKFLOW_MULTIBRANCH_PROJECT_CLASS = "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject";
 
     private final JenkinsServer jenkinsServer;
@@ -75,7 +76,8 @@ public class JenkinsServerWrapper {
     public JobWithDetailsWithProperties getJobByNameWithProperties(String jobName) {
         try {
             var fullJobPath = UrlUtils.toFullJobPath(jobName);
-            return jenkinsHttpClient.get(UrlUtils.toJobBaseUrl(null, fullJobPath), JobWithDetailsWithProperties.class);
+            return jenkinsHttpClient.get(UrlUtils.toJobBaseUrl(null, fullJobPath),
+                    JobWithDetailsWithProperties.class);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new JobNotFoundJenkinsApiException(jobName, e);
@@ -88,7 +90,7 @@ public class JenkinsServerWrapper {
      */
     public QueueItem getQueueItem(QueueReference queueRef) {
         try {
-            QueueItem queueItem = jenkinsServer.getQueueItem(queueRef);
+            var queueItem = jenkinsServer.getQueueItem(queueRef);
             if (queueItem == null) {
                 throw new QueueItemNotFoundJenkinsApiException(queueRef.getQueueItemUrlPart());
             }
@@ -105,7 +107,7 @@ public class JenkinsServerWrapper {
      */
     public Build getBuild(QueueItem queueItem) {
         try {
-            Build build = jenkinsServer.getBuild(queueItem);
+            var build = jenkinsServer.getBuild(queueItem);
             if (build == null) {
                 throw new BuildNotFoundJenkinsApiException(queueItem.getId());
             }

@@ -19,7 +19,7 @@ class AndCommandMatcherTest {
     @Test
     void shouldMatchAll() {
         EqualsCommandMatcher equalsCommandMatcher = new EqualsCommandMatcher("/one");
-        NoArgsCommandMatcher noArgsCommandMatcher = new NoArgsCommandMatcher();
+        InputBaseCommandMatcher noArgsCommandMatcher = new InputBaseCommandMatcher();
 
         AndCommandMatcher andCommandMatcher = new AndCommandMatcher(List.of(equalsCommandMatcher, noArgsCommandMatcher));
 
@@ -38,7 +38,7 @@ class AndCommandMatcherTest {
     @Test
     void shouldNonMatchWhenOneNotMatch() {
         EqualsCommandMatcher equalsCommandMatcher = new EqualsCommandMatcher("/one");
-        NoArgsCommandMatcher noArgsCommandMatcher = new NoArgsCommandMatcher();
+        InputBaseCommandMatcher noArgsCommandMatcher = new InputBaseCommandMatcher();
 
         AndCommandMatcher andCommandMatcher = new AndCommandMatcher(List.of(equalsCommandMatcher, noArgsCommandMatcher));
 

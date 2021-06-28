@@ -18,7 +18,8 @@ public class JenkinsJob {
 
     public boolean isFolder() {
         return JenkinsServerWrapper.FOLDER_CLASS.equals(originalJob.get_class())
-                || JenkinsServerWrapper.WORKFLOW_MULTIBRANCH_PROJECT_CLASS.equals(originalJob.get_class());
+                || JenkinsServerWrapper.WORKFLOW_MULTIBRANCH_PROJECT_CLASS.equals(originalJob.get_class())
+                || JenkinsServerWrapper.BRANCH_FOLDER_CLASS.equals(originalJob.get_class());
     }
 
 
