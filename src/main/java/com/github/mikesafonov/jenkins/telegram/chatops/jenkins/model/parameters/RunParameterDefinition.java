@@ -1,5 +1,8 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.parameters;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * @author Mike Safonov
  */
@@ -27,5 +30,12 @@ public class RunParameterDefinition extends ParameterDefinition {
         STABLE,
         SUCCESSFUL,
         COMPLETED
+    }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(" +
+                Arrays.stream(RunParameterFilter.values()).map(Enum::toString).collect(Collectors.joining(","))
+                + ")";
     }
 }

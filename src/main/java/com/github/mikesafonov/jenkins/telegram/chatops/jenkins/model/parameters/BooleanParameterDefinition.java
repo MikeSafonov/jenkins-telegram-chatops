@@ -18,4 +18,9 @@ public class BooleanParameterDefinition extends ParameterDefinition {
     public BooleanParameterValue getDefaultParameterValue() {
         return defaultParameterValue;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(true/false)";
+    }
 }

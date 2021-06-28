@@ -19,4 +19,9 @@ public class ChoiceParameterDefinition extends ParameterDefinition {
     public StringParameterValue getDefaultParameterValue() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(" + String.join(",", choices) + ")";
+    }
 }

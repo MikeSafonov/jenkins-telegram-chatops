@@ -12,4 +12,9 @@ public class StringParameterDefinition extends ParameterDefinition {
     public StringParameterValue getDefaultParameterValue() {
         return defaultParameterValue;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(string)";
+    }
 }

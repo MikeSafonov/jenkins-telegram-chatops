@@ -12,4 +12,9 @@ public class PasswordParameterDefinition extends ParameterDefinition {
     public PasswordParameterValue getDefaultParameterValue() {
         return defaultParameterValue;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(password)";
+    }
 }

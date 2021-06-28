@@ -12,4 +12,9 @@ public class GitParameterDefinition extends ParameterDefinition {
     public GitParameterValue getDefaultParameterValue() {
         return defaultParameterValue;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(git)";
+    }
 }

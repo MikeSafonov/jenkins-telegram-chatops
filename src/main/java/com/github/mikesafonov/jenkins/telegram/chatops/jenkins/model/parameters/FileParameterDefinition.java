@@ -10,4 +10,9 @@ public class FileParameterDefinition extends ParameterDefinition {
     public ParameterValue getDefaultParameterValue() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ")" + "(file)";
+    }
 }
