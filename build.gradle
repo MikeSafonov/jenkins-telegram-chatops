@@ -102,7 +102,7 @@ jacocoTestReport {
 }
 
 pitest {
-    junit5PluginVersion = '0.12'
+    junit5PluginVersion = '0.14'
     targetClasses = ["com.github.mikesafonov.jenkins.telegram.chatops.bot.*",
                      "com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*",
                      "com.github.mikesafonov.jenkins.telegram.chatops.utils.*"]
