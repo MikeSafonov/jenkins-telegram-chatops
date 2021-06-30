@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 @AllArgsConstructor
 public class Command {
 
-    private CommandMatcher matcher;
-    private Consumer<CommandContext> action;
+    private final CommandMatcher matcher;
+    private final Consumer<CommandContext> action;
 
     public boolean isMatch(CommandContext commandContext) {
         return matcher.match(commandContext);

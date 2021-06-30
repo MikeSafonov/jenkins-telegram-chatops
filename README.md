@@ -18,8 +18,8 @@ able to show list of Jenkins jobs and run specific job.
 
 ## Key features
 
-- `/jobs` or `/j` command for listing Jenkins jobs
-- `/run` or `/r` command for running specific Jenkins job
+- listing Jenkins jobs using `/jobs` command
+- running specific Jenkins job  
 - monitoring using [Prometheus](https://prometheus.io)
 - holding secrets with [HashiCorp Vault](https://www.vaultproject.io/)
 
@@ -141,19 +141,6 @@ Each steps performs REST API calls in `maxAttempts` attempts with some `delay`.
   <dd>delay in ms for `wait until job building`</dd>
  </dl>
 
-## Telegram bot commands
-
-Telegram bot supports following text commands:
-
-| command           | args                 | description                                                                                    |
-|-------------------|----------------------|------------------------------------------------------------------------------------------------|
-| `/jobs` or `/j`   | -                    | listing Jenkins jobs                                                                           |
-| `/jobs` or `/j`   | `folder_name`        | listing Jenkins jobs in specific folder. Example `/j myfolder`                                 |
-| `/jobs_` or `/j_` | `folder_name` in HEX | listing Jenkins jobs in specific folder. Example `/j_6d796a6f62`                               |
-| `/run` or `/r`    | `job_name` `args`    | run `job_name` Jenkins job, `args` are array of `NAME=VALUE` pairs. Example: `/r myjob FOO=BAR`|
-| `/run_` or `/r_`  | `job_name` in HEX    | run `job_name` Jenkins job. Example: `/r_6d796a6f62`                                           |
-| `/last` or `/l`   | `job_name`           | get last build info of specific Jenkins job                                                    |
-| `/help` or `/h`   | -                    | prints help message                                                                            |
 
 ### Running Jenkins jobs
 

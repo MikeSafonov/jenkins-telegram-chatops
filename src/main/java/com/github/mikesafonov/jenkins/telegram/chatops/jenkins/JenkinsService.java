@@ -44,7 +44,7 @@ public class JenkinsService {
     public List<JenkinsJob> getJobsInFolder(String folder) {
         JobWithDetails job = jenkinsServer.getJobByName(folder);
         Map<String, Job> jobs = jenkinsServer.getJobsByFolder(folder, job.getUrl());
-        return mapJobs(jobs);
+        return mapJobs(job, jobs);
     }
 
     /**
@@ -68,13 +68,13 @@ public class JenkinsService {
     public BuildWithDetails runJob(String jobName, Map<String, String> jobParameters) {
         JobWithDetailsWithProperties job = jenkinsServer.getJobByNameWithProperties(jobName);
         Map<String, String> params = jobParametersResolver.resolve(job, jobParameters);
-        QueueReference queueReference = buildJob(job, jobName, params);
+        var queueReference = buildJob(job, jobName, params);
 
         jenkinsWaitingService.waitUntilJobInQueue(jobName, queueReference);
 
         jenkinsWaitingService.waitUntilJobNotStarted(jobName, queueReference);
 
-        QueueItem queueItem = jenkinsServer.getQueueItem(queueReference);
+        var queueItem = jenkinsServer.getQueueItem(queueReference);
 
         if (queueItem.isCancelled()) {
             var build = jenkinsServer.getBuild(queueItem);
@@ -90,6 +90,12 @@ public class JenkinsService {
         return jobs.values().stream()
             .map(JenkinsJob::new)
             .collect(toList());
+    }
+
+    private List<JenkinsJob> mapJobs(JobWithDetails rootJob, Map<String, Job> jobs) {
+        return jobs.values().stream()
+                .map(job -> new JenkinsJob(job, rootJob.getFullName() + "/" + job.getName()))
+                .collect(toList());
     }
 
     private QueueReference buildJob(JobWithDetails job, String jobName, Map<String, String> params) {

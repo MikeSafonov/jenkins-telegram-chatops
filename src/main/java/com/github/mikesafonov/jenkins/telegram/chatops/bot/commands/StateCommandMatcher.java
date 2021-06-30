@@ -1,22 +1,19 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-
-import java.util.List;
 
 /**
  * @author Mike Safonov
  */
 @Value
 @RequiredArgsConstructor
-public class AndCommandMatcher implements CommandMatcher {
-
-    private final List<CommandMatcher> matchers;
+public class StateCommandMatcher implements CommandMatcher {
+    private final UserState expected;
 
     @Override
     public boolean match(CommandContext context) {
-        return matchers.stream()
-                .allMatch(matcher -> matcher.match(context));
+        return context.getState() == expected;
     }
 }

@@ -1,6 +1,7 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotSender;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
 import com.github.mikesafonov.jenkins.telegram.chatops.config.TelegramBotProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ class CommandContextTest {
     private TelegramBotProperties telegramBotProperties;
     private Update update;
     private Message message;
+    private Long chatId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -36,20 +38,19 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help@bot");
 
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties,
+                UserState.WAIT_COMMAND, chatId);
 
         assertEquals("/help", commandContext.getCommandText());
     }
 
     @Test
     void shouldReturnChatId() {
-        Long chatId = 1L;
-
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help@bot");
-        when(message.getChatId()).thenReturn(chatId);
 
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties,
+                UserState.WAIT_COMMAND, chatId);
 
         assertEquals(chatId, commandContext.getChatId());
     }
@@ -57,21 +58,12 @@ class CommandContextTest {
     @Test
     void shouldParseParams() {
         when(telegramBotProperties.getName()).thenReturn("bot");
-        when(message.getText()).thenReturn("/help one two");
+        when(message.getText()).thenReturn("one two");
 
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties,
+                UserState.WAIT_COMMAND, chatId);
 
         assertThat(commandContext.getArgs()).containsExactly("one", "two");
-    }
-
-    @Test
-    void shouldContainsEmptyParams(){
-        when(telegramBotProperties.getName()).thenReturn("bot");
-        when(message.getText()).thenReturn("/help");
-
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
-
-        assertThat(commandContext.getArgs()).isEmpty();
     }
 
     @Test
@@ -79,7 +71,8 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help one two");
 
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties,
+                UserState.WAIT_COMMAND, chatId);
 
         assertEquals(update, commandContext.getUpdate());
     }
@@ -89,7 +82,8 @@ class CommandContextTest {
         when(telegramBotProperties.getName()).thenReturn("bot");
         when(message.getText()).thenReturn("/help one two");
 
-        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties);
+        CommandContext commandContext = new CommandContext(update, sender, telegramBotProperties,
+                UserState.WAIT_COMMAND, chatId);
 
         assertEquals(sender, commandContext.getSender());
     }

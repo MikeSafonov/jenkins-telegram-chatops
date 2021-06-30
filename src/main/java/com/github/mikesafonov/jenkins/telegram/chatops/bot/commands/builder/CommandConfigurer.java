@@ -1,9 +1,7 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.builder;
 
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.AndCommandMatcher;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.Command;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandMatcher;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +12,8 @@ import java.util.function.Consumer;
  */
 public class CommandConfigurer {
 
-    private CommandsBuilder builder;
-    private List<CommandMatcher> matchers;
+    private final CommandsBuilder builder;
+    private final List<CommandMatcher> matchers;
     private Consumer<CommandContext> commandAction;
 
     public CommandConfigurer(CommandsBuilder builder, CommandMatcher matcher) {
@@ -29,18 +27,16 @@ public class CommandConfigurer {
         return this;
     }
 
-    public ArgsConfigurer args() {
-        return new ArgsConfigurer(this);
+    public CommandConfigurer state(UserState state) {
+        matchers.add(new StateCommandMatcher(state));
+        return this;
     }
+
 
     public CommandsBuilder and() {
         var andCommandMatcher = new AndCommandMatcher(matchers);
         var command = new Command(andCommandMatcher, commandAction);
         builder.registerCommand(command);
         return builder;
-    }
-
-    void addMatcher(CommandMatcher matcher) {
-        matchers.add(matcher);
     }
 }

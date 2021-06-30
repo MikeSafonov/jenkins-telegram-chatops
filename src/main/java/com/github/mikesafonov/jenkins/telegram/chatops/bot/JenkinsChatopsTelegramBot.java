@@ -23,17 +23,20 @@ public class JenkinsChatopsTelegramBot extends TelegramLongPollingBot {
     private final BotSecurityService botSecurityService;
     private final TelegramBotSender sender;
     private final List<Command> commands;
+    private final UserStateService userStateService;
 
     public JenkinsChatopsTelegramBot(DefaultBotOptions options,
                                      TelegramBotProperties telegramBotProperties,
                                      BotSecurityService botSecurityService,
                                      TelegramBotSender sender,
-                                     List<Command> commands) {
+                                     List<Command> commands,
+                                     UserStateService userStateService) {
         super(options);
         this.telegramBotProperties = telegramBotProperties;
         this.botSecurityService = botSecurityService;
         this.sender = sender;
         this.commands = commands;
+        this.userStateService = userStateService;
     }
 
     @Override
@@ -49,7 +52,9 @@ public class JenkinsChatopsTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         boolean authorized = botSecurityService.isAllowed(update);
-        var context = new CommandContext(update, sender, telegramBotProperties);
+        var chatId = resolveChatId(update);
+        var context = new CommandContext(update, sender, telegramBotProperties,
+                userStateService.getState(chatId), chatId);
         if (!authorized) {
             sender.sendUnauthorized(context.getChatId());
         } else {
@@ -57,6 +62,13 @@ public class JenkinsChatopsTelegramBot extends TelegramLongPollingBot {
                     .ifPresentOrElse(command -> command.getAction().accept(context),
                             () -> sender.sendUnknownCommand(context.getChatId(), context.getCommandText()));
         }
+    }
+
+    private Long resolveChatId(Update update) {
+        if(update.getMessage() != null) {
+            return update.getMessage().getChatId();
+        }
+        return update.getCallbackQuery().getFrom().getId();
     }
 
     private Optional<Command> findCommand(CommandContext commandContext) {

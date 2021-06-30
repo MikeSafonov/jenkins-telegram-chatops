@@ -1,9 +1,7 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.builder;
 
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.AndCommandMatcher;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.Command;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
-import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandMatcher;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,8 +68,8 @@ class CommandConfigurerTest {
         void shouldRegisterCommand() {
 
             commandConfigurer
-                .action(action)
-                .and();
+                    .action(action)
+                    .and();
 
             Command command = new Command(new AndCommandMatcher(List.of(initMatcher)), action);
 
@@ -82,6 +80,27 @@ class CommandConfigurerTest {
         @Test
         void shouldReturnBuilder() {
             assertThat(commandConfigurer.and()).isEqualTo(builder);
+        }
+    }
+
+    @Nested
+    class State {
+
+        private Consumer<CommandContext> action = context -> {
+        };
+
+        @Test
+        void shouldRegisterCommand() {
+
+            commandConfigurer
+                    .action(action)
+                    .state(UserState.WAIT_COMMAND)
+                    .and();
+
+            Command command = new Command(new AndCommandMatcher(List.of(initMatcher,
+                    new StateCommandMatcher(UserState.WAIT_COMMAND))), action);
+
+            verify(builder).registerCommand(command);
         }
     }
 

@@ -68,6 +68,8 @@ dependencies {
 
     implementation("org.telegram:telegrambots-spring-boot-starter:5.2.0")
 
+    implementation("com.vdurmont:emoji-java:5.1.1")
+
     implementation("io.micrometer:micrometer-core")
     implementation("io.micrometer:micrometer-registry-prometheus")
 

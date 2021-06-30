@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
@@ -45,12 +46,15 @@ public class TelegramBotSender extends DefaultAbsSender {
     }
 
     public void sendMarkdownTextMessage(Long chatId, String text) {
-        SendMessage message = new SendMessage(chatId.toString(), text);
-        message.enableMarkdown(true);
+        var message = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .parseMode(ParseMode.MARKDOWN)
+                .build();
         sendTelegramMessage(message);
     }
 
-    private void sendTelegramMessage(SendMessage sendMessage) {
+    public void sendTelegramMessage(SendMessage sendMessage) {
         try {
             sendMethod(sendMessage);
         } catch (TelegramApiRequestException e) {

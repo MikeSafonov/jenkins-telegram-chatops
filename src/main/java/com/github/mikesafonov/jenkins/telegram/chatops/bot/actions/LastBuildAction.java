@@ -1,5 +1,7 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.actions;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserStateService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
 import com.github.mikesafonov.jenkins.telegram.chatops.utils.DurationFormatter;
@@ -17,10 +19,11 @@ import java.util.function.Consumer;
 public class LastBuildAction implements Consumer<CommandContext> {
 
     private final JenkinsService jenkinsService;
+    private final UserStateService userStateService;
 
     @Override
     public void accept(CommandContext context) {
-        String jobName = context.getArgs()[0];
+        var jobName = context.getUpdate().getCallbackQuery().getData().replace("/l ", "");
         var lastBuild = jenkinsService.getLastBuild(jobName);
         String message;
         if (lastBuild.getResult() == BuildResult.NOT_BUILT) {
@@ -39,10 +42,11 @@ public class LastBuildAction implements Consumer<CommandContext> {
                 ")";
         }
         context.getSender().sendMarkdownTextMessage(context.getChatId(), message);
+        userStateService.update(context.getChatId(), UserState.WAIT_COMMAND);
     }
 
     private String getDurationString(long msValue) {
-        Duration duration = Duration.of(msValue, ChronoUnit.MILLIS);
+        var duration = Duration.of(msValue, ChronoUnit.MILLIS);
         return new DurationFormatter(duration).format();
     }
 }

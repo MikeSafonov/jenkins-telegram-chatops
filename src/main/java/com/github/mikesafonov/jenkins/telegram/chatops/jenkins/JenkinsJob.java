@@ -1,6 +1,8 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
 import com.offbytwo.jenkins.model.Job;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -9,11 +11,15 @@ import java.io.IOException;
  * @author Mike Safonov
  */
 @Log4j2
+@AllArgsConstructor
 public class JenkinsJob {
     private final Job originalJob;
+    @Getter
+    private final String fullName;
+
 
     public JenkinsJob(Job originalJob) {
-        this.originalJob = originalJob;
+        this(originalJob, (originalJob.getFullName() == null) ? originalJob.getName() : originalJob.getFullName());
     }
 
     public boolean isFolder() {
@@ -25,10 +31,6 @@ public class JenkinsJob {
 
     public Job getOriginalJob() {
         return originalJob;
-    }
-
-    public String getUrl(){
-        return originalJob.getUrl();
     }
 
     public boolean isBuildable() {

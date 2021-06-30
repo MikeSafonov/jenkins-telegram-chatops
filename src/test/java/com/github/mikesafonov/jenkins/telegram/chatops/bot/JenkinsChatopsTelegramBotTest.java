@@ -26,6 +26,7 @@ class JenkinsChatopsTelegramBotTest {
     private TelegramBotProperties telegramBotProperties;
     private BotSecurityService botSecurityService;
     private TelegramBotSender telegramBotSender;
+    private UserStateService userStateService;
     private JenkinsChatopsTelegramBot telegramBot;
 
     @BeforeEach
@@ -34,6 +35,7 @@ class JenkinsChatopsTelegramBotTest {
         telegramBotProperties = mock(TelegramBotProperties.class);
         botSecurityService = mock(BotSecurityService.class);
         telegramBotSender = mock(TelegramBotSender.class);
+        userStateService = mock(UserStateService.class);
     }
 
     @Nested
@@ -43,7 +45,8 @@ class JenkinsChatopsTelegramBotTest {
         @BeforeEach
         void setUp() {
             telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                    botSecurityService, telegramBotSender, Collections.emptyList());
+                    botSecurityService, telegramBotSender, Collections.emptyList(),
+                    userStateService);
         }
 
         @Test
@@ -61,7 +64,8 @@ class JenkinsChatopsTelegramBotTest {
         @BeforeEach
         void setUp() {
             telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                    botSecurityService, telegramBotSender, Collections.emptyList());
+                    botSecurityService, telegramBotSender, Collections.emptyList(),
+                    userStateService);
         }
 
         @Test
@@ -79,7 +83,8 @@ class JenkinsChatopsTelegramBotTest {
         @BeforeEach
         void setUp() {
             telegramBot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                    botSecurityService, telegramBotSender, Collections.emptyList());
+                    botSecurityService, telegramBotSender, Collections.emptyList(),
+                    userStateService);
         }
 
         @Nested
@@ -93,7 +98,8 @@ class JenkinsChatopsTelegramBotTest {
                 when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
                 bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                        botSecurityService, telegramBotSender, List.of(command));
+                        botSecurityService, telegramBotSender, List.of(command),
+                        userStateService);
 
                 when(botSecurityService.isAllowed(any(Update.class))).thenReturn(false);
             }
@@ -123,7 +129,8 @@ class JenkinsChatopsTelegramBotTest {
                 when(command.isMatch(any(CommandContext.class))).thenReturn(true);
 
                 bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                        botSecurityService, telegramBotSender, List.of(command));
+                        botSecurityService, telegramBotSender, List.of(command),
+                        userStateService);
 
                 when(botSecurityService.isAllowed(any(Update.class))).thenReturn(true);
             }
@@ -138,8 +145,10 @@ class JenkinsChatopsTelegramBotTest {
                 when(update.getMessage()).thenReturn(message);
                 when(message.getChatId()).thenReturn(chatId);
                 when(message.getText()).thenReturn("command");
+                when(userStateService.getState(chatId)).thenReturn(UserState.WAIT_COMMAND);
 
-                CommandContext commandContext = new CommandContext(update, telegramBotSender, telegramBotProperties);
+                CommandContext commandContext = new CommandContext(update,
+                        telegramBotSender, telegramBotProperties, UserState.WAIT_COMMAND, chatId);
 
                 bot.onUpdateReceived(update);
 
@@ -158,7 +167,7 @@ class JenkinsChatopsTelegramBotTest {
                     when(two.isMatch(any(CommandContext.class))).thenReturn(false);
 
                     var bot = new JenkinsChatopsTelegramBot(defaultBotOptions, telegramBotProperties,
-                            botSecurityService, telegramBotSender, commands);
+                            botSecurityService, telegramBotSender, commands, userStateService);
                     Update update = mock(Update.class);
                     Message message = mock(Message.class);
                     when(update.getMessage()).thenReturn(message);

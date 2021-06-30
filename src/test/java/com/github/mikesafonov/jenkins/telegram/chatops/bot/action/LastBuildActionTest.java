@@ -1,6 +1,8 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.bot.action;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotSender;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserState;
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserStateService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.actions.LastBuildAction;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.CommandContext;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
@@ -9,6 +11,8 @@ import com.offbytwo.jenkins.model.BuildWithDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.mockito.Mockito.*;
 
@@ -21,22 +25,29 @@ class LastBuildActionTest {
     private LastBuildAction action;
     private CommandContext context;
     private TelegramBotSender telegramBotSender;
+    private UserStateService userStateService;
     private String jobName;
     private Long chatId;
 
     @BeforeEach
     void setUp() {
         jenkinsService = mock(JenkinsService.class);
-        action = new LastBuildAction(jenkinsService);
+        userStateService = mock(UserStateService.class);
+        action = new LastBuildAction(jenkinsService, userStateService);
 
         telegramBotSender = mock(TelegramBotSender.class);
         context = mock(CommandContext.class);
+        var update = mock(Update.class);
+        var query = mock(CallbackQuery.class);
         jobName = "name";
         chatId = 10L;
 
         when(context.getArgs()).thenReturn(new String[]{jobName});
         when(context.getSender()).thenReturn(telegramBotSender);
         when(context.getChatId()).thenReturn(chatId);
+        when(context.getUpdate()).thenReturn(update);
+        when(update.getCallbackQuery()).thenReturn(query);
+        when(query.getData()).thenReturn("/l name");
     }
 
     @Nested
@@ -54,6 +65,12 @@ class LastBuildActionTest {
             verify(telegramBotSender).sendMarkdownTextMessage(chatId, "No last build of *" + jobName + "*");
         }
 
+        @Test
+        void shouldChangeState() {
+            action.accept(context);
+
+            verify(userStateService).update(chatId, UserState.WAIT_COMMAND);
+        }
     }
 
     @Nested
@@ -84,20 +101,27 @@ class LastBuildActionTest {
         void shouldSendExpectedMessage() {
 
             String message = "Last build of *" +
-                jobName +
-                "* #" +
-                number +
-                "\n*Result*: " +
-                result +
-                "\n*Duration*: 1 s " +
-                "\n[Launch on Jenkins](" +
-                url +
-                ")";
+                    jobName +
+                    "* #" +
+                    number +
+                    "\n*Result*: " +
+                    result +
+                    "\n*Duration*: 1 s " +
+                    "\n[Launch on Jenkins](" +
+                    url +
+                    ")";
 
             action.accept(context);
 
             verify(telegramBotSender)
-                .sendMarkdownTextMessage(chatId, message);
+                    .sendMarkdownTextMessage(chatId, message);
+        }
+
+        @Test
+        void shouldChangeState() {
+            action.accept(context);
+
+            verify(userStateService).update(chatId, UserState.WAIT_COMMAND);
         }
     }
 
