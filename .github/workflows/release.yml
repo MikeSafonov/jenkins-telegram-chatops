@@ -16,9 +16,12 @@ jobs:
           distribution: 'adopt'
       - name: Build
         run: gradle build
-      - name: Upload release binaries
-        uses: alexellis/upload-assets@0.2.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          asset_paths: '["build/libs/*.jar"]'
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/libs/jenkins-telegram-chatops.jar
+          asset_name: jenkins-telegram-chatops.jar
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "jenkins-telegram-chatops.jar"
