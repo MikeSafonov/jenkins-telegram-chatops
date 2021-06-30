@@ -16,7 +16,7 @@ jobs:
           distribution: 'adopt'
       - name: Build
         run: gradle build
-      - uses: actions/upload-artifact@v2
+      - uses: AButler/upload-release-assets@v2.0
         with:
-          name: jenkins-telegram-chatops.jar
-          path: build/libs/jenkins-telegram-chatops.jar
+          files: 'build/libs/jenkins-telegram-chatops.jar'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
