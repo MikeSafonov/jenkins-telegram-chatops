@@ -2,8 +2,9 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Safonov
@@ -14,13 +15,9 @@ public class ArgsParserService {
     private static final String SPLITERATOR = "=";
 
     public Map<String, String> parse(String[] args) {
-        Map<String, String> parameters = new HashMap<>();
-        for (String arg : args) {
-            String[] split = arg.split(SPLITERATOR);
-            if (split.length == 2) {
-                parameters.put(split[0], split[1]);
-            }
-        }
-        return parameters;
+        return Arrays.stream(args)
+                .map(argument -> argument.split(SPLITERATOR))
+                .filter(params -> params.length == 2)
+                .collect(Collectors.toMap(params -> params[0], params -> params[1]));
     }
 }
