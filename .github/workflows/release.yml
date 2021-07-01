@@ -17,11 +17,7 @@ jobs:
       - name: Build
         run: gradle build
       - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        uses: AButler/upload-release-assets@v2.0
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/libs/jenkins-telegram-chatops.jar
-          asset_name: jenkins-telegram-chatops.jar
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: "jenkins-telegram-chatops.jar"
+          files: 'build/libs/jenkins-telegram-chatops.jar'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
