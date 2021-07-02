@@ -2,7 +2,9 @@ package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
-import com.offbytwo.jenkins.model.*;
+import com.offbytwo.jenkins.model.JobWithDetails;
+import com.offbytwo.jenkins.model.QueueItem;
+import com.offbytwo.jenkins.model.QueueReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -31,8 +33,8 @@ public class JenkinsWaitingService {
             maxAttemptsExpression = "#{${jenkins.retry.inqueue.maxAttempts}}",
             backoff = @Backoff(delayExpression = "#{${jenkins.retry.inqueue.backoff.delay}}"))
     public void waitUntilJobInQueue(String jobName, QueueReference queueRef) {
-        JobWithDetails jobWithDetails = jenkinsServer.getJobByName(jobName);
-        QueueItem item = jenkinsServer.getQueueItem(queueRef);
+        var jobWithDetails = jenkinsServer.getJobByName(jobName);
+        var item = jenkinsServer.getQueueItem(queueRef);
         if (isInQueue(item, jobWithDetails)) {
             throw new RunJobJenkinsApiException("Job " + jobName + " still in queue");
         }
@@ -48,7 +50,7 @@ public class JenkinsWaitingService {
             maxAttemptsExpression = "#{${jenkins.retry.notstarted.maxAttempts}}",
             backoff = @Backoff(delayExpression = "#{${jenkins.retry.notstarted.backoff.delay}}"))
     public void waitUntilJobNotStarted(String jobName, QueueReference queueRef) {
-        QueueItem item = jenkinsServer.getQueueItem(queueRef);
+        var item = jenkinsServer.getQueueItem(queueRef);
         if (isNotExecutable(item)) {
             throw new RunJobJenkinsApiException("Job " + jobName + " still not executable");
         }
@@ -57,21 +59,20 @@ public class JenkinsWaitingService {
     /**
      * Wait until job with name {@code jobName} building
      *
-     * @param jobName Jenkins job name
      * @param build   Jenkins build
      */
     @Retryable(value = {RunJobJenkinsApiException.class}, exclude = {BuildDetailsNotFoundJenkinsApiException.class},
             maxAttemptsExpression = "#{${jenkins.retry.building.maxAttempts}}",
             backoff = @Backoff(delayExpression = "#{${jenkins.retry.building.backoff.delay}}"))
-    public void waitUntilJobIsBuilding(String jobName, Build build) {
+    public void waitUntilJobIsBuilding(ContinuousBuild build) {
         try {
-            BuildWithDetails details = build.details();
+            var details = build.details();
             if (details.isBuilding()) {
-                throw new RunJobJenkinsApiException("Job " + jobName + " still building");
+                throw new RunJobJenkinsApiException("Job " + build.getJobName() + " still building");
             }
         } catch (IOException e) {
-            throw new BuildDetailsNotFoundJenkinsApiException("Unable to find details for job " + jobName +
-                    " and build N " + build.getNumber(), e);
+            throw new BuildDetailsNotFoundJenkinsApiException("Unable to find details for job " + build.getJobName() +
+                    " and build N " + build.number(), e);
         }
     }
 

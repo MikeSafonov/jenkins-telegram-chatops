@@ -126,9 +126,10 @@ public class JenkinsWaitingServiceTest {
         void shouldThrowBuildDetailsNotFoundJenkinsApiException() throws IOException {
             Build build = mock(Build.class);
             when(build.details()).thenThrow(IOException.class);
+            var continuousBuild = new ContinuousBuild(jobName, build);
 
             assertThrows(BuildDetailsNotFoundJenkinsApiException.class,
-                    () -> jenkinsWaitingService.waitUntilJobIsBuilding(jobName, build));
+                    () -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
         }
 
         @Test
@@ -137,9 +138,10 @@ public class JenkinsWaitingServiceTest {
             BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
             when(build.details()).thenReturn(buildWithDetails);
             when(buildWithDetails.isBuilding()).thenReturn(true);
+            var continuousBuild = new ContinuousBuild(jobName, build);
 
             assertThrows(RunJobJenkinsApiException.class,
-                    () -> jenkinsWaitingService.waitUntilJobIsBuilding(jobName, build));
+                    () -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
         }
 
         @Test
@@ -148,8 +150,9 @@ public class JenkinsWaitingServiceTest {
             BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
             when(build.details()).thenReturn(buildWithDetails);
             when(buildWithDetails.isBuilding()).thenReturn(false);
+            var continuousBuild = new ContinuousBuild(jobName, build);
 
-            assertDoesNotThrow(() -> jenkinsWaitingService.waitUntilJobIsBuilding(jobName, build));
+            assertDoesNotThrow(() -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
         }
     }
 }

@@ -226,8 +226,9 @@ public class JenkinsServiceTest {
                 @Test
                 void shouldWaitUntilJobIsBuilding() {
                     jenkinsService.runJob(name, emptyMap());
+                    var continuousBuild = new ContinuousBuild(name, build);
 
-                    verify(jenkinsWaitingService, times(1)).waitUntilJobIsBuilding(name, build);
+                    verify(jenkinsWaitingService, times(1)).waitUntilJobIsBuilding(continuousBuild);
                 }
             }
 

@@ -82,7 +82,8 @@ public class JenkinsService {
         }
 
         var build = jenkinsServer.getBuild(queueItem);
-        jenkinsWaitingService.waitUntilJobIsBuilding(jobName, build);
+        var continuousBuild = new ContinuousBuild(jobName, build);
+        jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild);
         return getDetails(jobName, build);
     }
 
