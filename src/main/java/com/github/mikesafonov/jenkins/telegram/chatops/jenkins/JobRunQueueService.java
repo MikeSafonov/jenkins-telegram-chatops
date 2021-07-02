@@ -26,7 +26,7 @@ public class JobRunQueueService {
     private final JenkinsService jenkinsService;
     private final TelegramBotSender telegramBotSender;
     private final Executor jobRunExecutor;
-    private BlockingQueue<JobToRun> jobs = new LinkedBlockingQueue<>();
+    private final BlockingQueue<JobToRun> jobs = new LinkedBlockingQueue<>();
 
     /**
      * add new job to queue
@@ -52,21 +52,26 @@ public class JobRunQueueService {
     }
 
     private void doRunJob(JobToRun job) {
-        CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName(), job.getParameters()), jobRunExecutor)
-            .thenAccept(build -> {
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                    createSuccessMessage(job, build));
-            })
-            .exceptionally(e -> {
-                telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
-                    createExceptionallyMessage(job, e));
-                return null;
-            });
+        CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName(), job.getParameters()),
+                jobRunExecutor)
+                .thenAccept(build -> sendSuccessMessage(job, build))
+                .exceptionally(e -> sendExceptionMessage(job, e));
+    }
+
+    private Void sendExceptionMessage(JobToRun job, Throwable e) {
+        telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                createExceptionallyMessage(job, e));
+        return null;
+    }
+
+    private void sendSuccessMessage(JobToRun job, BuildWithDetails build) {
+        telegramBotSender.sendMarkdownTextMessage(job.getUserId(),
+                createSuccessMessage(job, build));
     }
 
     private String createSuccessMessage(JobToRun job, BuildWithDetails build) {
         return "Build of *" + job.getJobName() + "* has been finished\nResult: *"
-            + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
+                + build.getResult() + "*\n[Launch on Jenkins](" + build.getUrl() + ")";
     }
 
     private String createExceptionallyMessage(JobToRun job, Throwable e) {
