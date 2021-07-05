@@ -7,9 +7,7 @@ import com.github.mikesafonov.jenkins.telegram.chatops.bot.UserStateService;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.actions.*;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.Command;
 import com.github.mikesafonov.jenkins.telegram.chatops.bot.commands.builder.CommandsBuilder;
-import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsServerWrapper;
-import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JenkinsService;
-import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.JobRunQueueService;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,7 +25,9 @@ public class BotConfiguration {
                                   JobRunQueueService jobRunQueueService,
                                   UserStateService userStateService,
                                   JenkinsServerWrapper jenkinsServerWrapper,
-                                  ArgsParserService argsParserService) {
+                                  ArgsParserService argsParserService,
+                                  InMemoryInputParameterDataStorage dataStorage,
+                                  JobInputService jobInputService) {
         return new CommandsBuilder()
                 .command("/help")
                 .action(new SendHelpMessageAction(messageBuilderService))
@@ -53,6 +53,10 @@ public class BotConfiguration {
                 .input()
                 .state(UserState.WAIT_PARAMETERS)
                 .action(new RunJobWithParametersCommandAction(jobRunQueueService, userStateService, argsParserService))
+                .and()
+                .input()
+                .state(UserState.WAIT_INPUTS)
+                .action(new InputParameterAction(dataStorage, jobInputService, userStateService))
                 .and()
                 .build();
     }

@@ -5,5 +5,6 @@ package com.github.mikesafonov.jenkins.telegram.chatops.bot;
  */
 public enum UserState {
     WAIT_COMMAND,
-    WAIT_PARAMETERS
+    WAIT_PARAMETERS,
+    WAIT_INPUTS
 }
