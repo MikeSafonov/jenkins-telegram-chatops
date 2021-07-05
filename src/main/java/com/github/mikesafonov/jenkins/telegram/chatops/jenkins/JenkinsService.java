@@ -1,5 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
@@ -61,11 +62,13 @@ public class JenkinsService {
     /**
      * Runs job with name {@code jobName} and wait until its finished
      *
-     * @param jobName       Jenkins job name
-     * @param jobParameters job parameters
+     * @param jobToRun       Jenkins job
      * @return build details
      */
-    public BuildWithDetails runJob(String jobName, Map<String, String> jobParameters) {
+    public BuildWithDetails runJob(JobToRun jobToRun) {
+        var jobName = jobToRun.getJobName();
+        var jobParameters = jobToRun.getParameters();
+
         JobWithDetailsWithProperties job = jenkinsServer.getJobByNameWithProperties(jobName);
         Map<String, String> params = jobParametersResolver.resolve(job, jobParameters);
         var queueReference = buildJob(job, jobName, params);
@@ -82,7 +85,7 @@ public class JenkinsService {
         }
 
         var build = jenkinsServer.getBuild(queueItem);
-        var continuousBuild = new ContinuousBuild(jobName, build);
+        var continuousBuild = new ContinuousBuild(jobToRun.getUserId(), jobName, build);
         jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild);
         return getDetails(jobName, build);
     }

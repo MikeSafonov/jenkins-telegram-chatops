@@ -52,7 +52,7 @@ public class JobRunQueueService {
     }
 
     private void doRunJob(JobToRun job) {
-        CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job.getJobName(), job.getParameters()),
+        CompletableFuture.supplyAsync(() -> jenkinsService.runJob(job),
                 jobRunExecutor)
                 .thenAccept(build -> sendSuccessMessage(job, build))
                 .exceptionally(e -> sendExceptionMessage(job, e));

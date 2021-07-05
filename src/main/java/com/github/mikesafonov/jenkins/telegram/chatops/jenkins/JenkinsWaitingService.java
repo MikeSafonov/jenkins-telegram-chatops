@@ -1,11 +1,13 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotInputRequester;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
 import com.offbytwo.jenkins.model.JobWithDetails;
 import com.offbytwo.jenkins.model.QueueItem;
 import com.offbytwo.jenkins.model.QueueReference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,13 @@ import java.io.IOException;
  *
  * @author Mike Safonov
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class JenkinsWaitingService {
     private final JenkinsServerWrapper jenkinsServer;
+    private final JobInputService jobInputService;
+    private final TelegramBotInputRequester inputRequester;
 
     /**
      * Waits until job with name {@code jobName} in Jenkins queue.
@@ -59,7 +64,7 @@ public class JenkinsWaitingService {
     /**
      * Wait until job with name {@code jobName} building
      *
-     * @param build   Jenkins build
+     * @param build Jenkins build
      */
     @Retryable(value = {RunJobJenkinsApiException.class}, exclude = {BuildDetailsNotFoundJenkinsApiException.class},
             maxAttemptsExpression = "#{${jenkins.retry.building.maxAttempts}}",
@@ -68,6 +73,10 @@ public class JenkinsWaitingService {
         try {
             var details = build.details();
             if (details.isBuilding()) {
+                var pendingInputs = jobInputService.getPendingInputs(build.getBuild());
+                if (!pendingInputs.isEmpty()) {
+                    inputRequester.request(build, pendingInputs);
+                }
                 throw new RunJobJenkinsApiException("Job " + build.getJobName() + " still building");
             }
         } catch (IOException e) {

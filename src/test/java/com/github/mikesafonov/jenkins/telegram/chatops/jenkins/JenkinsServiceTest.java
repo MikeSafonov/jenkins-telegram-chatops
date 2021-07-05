@@ -1,5 +1,6 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.dto.JobToRun;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.JobWithDetailsWithProperties;
@@ -123,8 +124,9 @@ public class JenkinsServiceTest {
 
                 when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
                 when(job.build(true)).thenThrow(IOException.class);
+                JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
 
-                assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(name, emptyMap()));
+                assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(jobToRun));
             }
 
             @Test
@@ -132,13 +134,14 @@ public class JenkinsServiceTest {
             void shouldThrowBuildDetailsNotFoundJenkinsApiExceptionWithParameters() {
                 String name = "name";
                 JobWithDetailsWithProperties job = mock(JobWithDetailsWithProperties.class);
+                JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
 
                 Map<String, String> params = Map.of("one", "two");
                 when(jenkinsServerWrapper.getJobByNameWithProperties(name)).thenReturn(job);
                 when(jobParametersResolver.resolve(job, emptyMap())).thenReturn(params);
                 when(job.build(params, true)).thenThrow(IOException.class);
 
-                assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(name, emptyMap()));
+                assertThrows(RunJobJenkinsApiException.class, () -> jenkinsService.runJob(jobToRun));
             }
 
             @Test
@@ -156,8 +159,9 @@ public class JenkinsServiceTest {
                 when(queueItem.isCancelled()).thenReturn(true);
                 when(jenkinsServerWrapper.getBuild(queueItem)).thenReturn(build);
                 when(build.details()).thenThrow(IOException.class);
+                JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
 
-                assertThrows(BuildDetailsNotFoundJenkinsApiException.class, () -> jenkinsService.runJob(name, emptyMap()));
+                assertThrows(BuildDetailsNotFoundJenkinsApiException.class, () -> jenkinsService.runJob(jobToRun));
             }
         }
 
@@ -205,28 +209,31 @@ public class JenkinsServiceTest {
                 @Test
                 @SneakyThrows
                 void shouldReturnExpectedDetails() {
-
-                    assertEquals(buildWithDetails, jenkinsService.runJob(name, emptyMap()));
+                    JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
+                    assertEquals(buildWithDetails, jenkinsService.runJob(jobToRun));
                 }
 
                 @Test
                 void shouldWaitUntilJobInQueue() {
-                    jenkinsService.runJob(name, emptyMap());
+                    JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
+                    jenkinsService.runJob(jobToRun);
 
                     verify(jenkinsWaitingService, times(1)).waitUntilJobInQueue(name, queueReference);
                 }
 
                 @Test
                 void shouldWaitUntilJobNotStarted() {
-                    jenkinsService.runJob(name, emptyMap());
+                    JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
+                    jenkinsService.runJob(jobToRun);
 
                     verify(jenkinsWaitingService, times(1)).waitUntilJobNotStarted(name, queueReference);
                 }
 
                 @Test
                 void shouldWaitUntilJobIsBuilding() {
-                    jenkinsService.runJob(name, emptyMap());
-                    var continuousBuild = new ContinuousBuild(name, build);
+                    JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
+                    jenkinsService.runJob(jobToRun);
+                    var continuousBuild = new ContinuousBuild(10L, name, build);
 
                     verify(jenkinsWaitingService, times(1)).waitUntilJobIsBuilding(continuousBuild);
                 }
@@ -243,8 +250,8 @@ public class JenkinsServiceTest {
                 @Test
                 @SneakyThrows
                 void shouldReturnExpectedDetails() {
-
-                    assertEquals(buildWithDetails, jenkinsService.runJob(name, emptyMap()));
+                    JobToRun jobToRun = new JobToRun(name, 10L, emptyMap());
+                    assertEquals(buildWithDetails, jenkinsService.runJob(jobToRun));
                 }
             }
         }

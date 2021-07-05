@@ -1,20 +1,22 @@
 package com.github.mikesafonov.jenkins.telegram.chatops.jenkins;
 
+import com.github.mikesafonov.jenkins.telegram.chatops.bot.TelegramBotInputRequester;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.BuildDetailsNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.JobNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.QueueItemNotFoundJenkinsApiException;
 import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.exceptions.RunJobJenkinsApiException;
+import com.github.mikesafonov.jenkins.telegram.chatops.jenkins.model.PendingInput;
 import com.offbytwo.jenkins.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Mike Safonov
@@ -23,12 +25,16 @@ public class JenkinsWaitingServiceTest {
     private String jobName = "Job Name";
     private QueueReference queueReference = new QueueReference("location");
     private JenkinsServerWrapper jenkinsServerWrapper;
+    private JobInputService jobInputService;
+    private TelegramBotInputRequester inputRequester;
     private JenkinsWaitingService jenkinsWaitingService;
 
     @BeforeEach
     void setUp() {
         jenkinsServerWrapper = mock(JenkinsServerWrapper.class);
-        jenkinsWaitingService = new JenkinsWaitingService(jenkinsServerWrapper);
+        jobInputService = mock(JobInputService.class);
+        inputRequester = mock(TelegramBotInputRequester.class);
+        jenkinsWaitingService = new JenkinsWaitingService(jenkinsServerWrapper, jobInputService,  inputRequester);
     }
 
     @Nested
@@ -126,7 +132,7 @@ public class JenkinsWaitingServiceTest {
         void shouldThrowBuildDetailsNotFoundJenkinsApiException() throws IOException {
             Build build = mock(Build.class);
             when(build.details()).thenThrow(IOException.class);
-            var continuousBuild = new ContinuousBuild(jobName, build);
+            var continuousBuild = new ContinuousBuild(10L, jobName, build);
 
             assertThrows(BuildDetailsNotFoundJenkinsApiException.class,
                     () -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
@@ -138,10 +144,27 @@ public class JenkinsWaitingServiceTest {
             BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
             when(build.details()).thenReturn(buildWithDetails);
             when(buildWithDetails.isBuilding()).thenReturn(true);
-            var continuousBuild = new ContinuousBuild(jobName, build);
+            when(jobInputService.getPendingInputs(build)).thenReturn(List.of());
+            var continuousBuild = new ContinuousBuild(10L, jobName, build);
 
             assertThrows(RunJobJenkinsApiException.class,
                     () -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
+            verifyNoInteractions(inputRequester);
+        }
+
+        @Test
+        void shouldCallInputRequesterWhenPendingInputs() throws IOException {
+            Build build = mock(Build.class);
+            BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
+            when(build.details()).thenReturn(buildWithDetails);
+            when(buildWithDetails.isBuilding()).thenReturn(true);
+            var pendingInputs = List.of(new PendingInput());
+            when(jobInputService.getPendingInputs(build)).thenReturn(pendingInputs);
+            var continuousBuild = new ContinuousBuild(10L, jobName, build);
+
+            assertThrows(RunJobJenkinsApiException.class,
+                    () -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
+            verify(inputRequester).request(continuousBuild, pendingInputs);
         }
 
         @Test
@@ -150,7 +173,7 @@ public class JenkinsWaitingServiceTest {
             BuildWithDetails buildWithDetails = mock(BuildWithDetails.class);
             when(build.details()).thenReturn(buildWithDetails);
             when(buildWithDetails.isBuilding()).thenReturn(false);
-            var continuousBuild = new ContinuousBuild(jobName, build);
+            var continuousBuild = new ContinuousBuild(10L, jobName, build);
 
             assertDoesNotThrow(() -> jenkinsWaitingService.waitUntilJobIsBuilding(continuousBuild));
         }
